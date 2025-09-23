@@ -76,7 +76,7 @@ DATABASE_PASSWORD=Admin123
 
 ## 📄 Documentação
 
-[Documentação](https://docs.google.com/document/d/1AAftUtZLdgNcrAR81hu4ujMgPfKsgk5sTsIFrUFoR6M/edit?usp=sharing)
+[Documentação](https://docs.google.com/document/d/1Wcm7rU8M-KzOWyroloNW2MCT5hMKPz27V5oUWZ41BAA/edit?tab=t.0#heading=h.t5lws1x1u33z)
 [Prototipação](https://www.figma.com/design/Nw6ZMXU4QDHtnW0xVftRn1/Untitled?node-id=0-1&t=Ecz3DBGmvg3mjTuf-1).
 [Trello](https://trello.com/invite/b/67e30a8d5b7a21524c2541ac/ATTI536628c2633e8b3c378224e702e822b7F186A0A2/brancho).
 
@@ -110,7 +110,7 @@ Apenas membros da equipe BRANCHó podem contribuir nesse projeto. Entretanto, po
 ### Segundo Semestre
 
 - [Henrique Vicente Iha](https://github.com/catchdark) : Front End
-- [Herick Campos Calegari](https://github.com/HerickCallegari) : Back End
+- [Luiz Felipe Bastião](https://github.com/LuizFelipeBastiao) : Back End
 - [Murilo Pistore Moreira Ramos](https://github.com/thebud4) : Ajuda Geral
 
 ---
