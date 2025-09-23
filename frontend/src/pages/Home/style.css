@@ -1,0 +1,31 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #c2c0c0;
+}
+
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+img {
+  height: 100vh;
+  width: 80vw;
+}
+
+h1 {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-weight: bold;
+  color: #ffffff;
+  margin-right: 30px;
+  text-shadow: #2c0a00 10px 10px 10px;
+}

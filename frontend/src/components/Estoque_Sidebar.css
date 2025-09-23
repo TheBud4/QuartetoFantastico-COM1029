@@ -1,0 +1,88 @@
+.estoque-container {
+  display: flex;
+  font-family: 'Inter', sans-serif;
+}
+
+.sidebar {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: rgb(255, 255, 255);
+  /* Parte branca */
+  max-height: 100%;
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 30px;
+}
+
+
+/* Cabeçalho da sidebar */
+.sidebar-header {
+  background-color: #3b0000;
+  color: white;
+  padding: 1.5rem;
+  font-size: 50px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.sidebar h1 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: none;
+  color: #000;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  height: 2rem;
+}
+
+.nav-button .icon {
+  position: absolute;
+  left: 16px;
+  font-size: 18px;
+}
+
+.nav-button .label {
+  margin: 0 auto;
+  font-weight: 500;
+}
+
+.nav-button.active,
+.nav-button:hover {
+  background: #210400;
+  color: #ffffff;
+  font-weight: bold;
+  border: none;
+}
+
+
+
+.btn-registrar {
+  background: #3b0000;
+  color: white;
+  font-weight: bold;
+  border: none;
+  padding: 0.6rem 1.4rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
