@@ -19,17 +19,16 @@ Um sistema de gerenciamento de estoque feito com Express e React.
 
 ## 📦 Sobre o Projeto
 
-O nosso projeto se propõe a resolver a problemática das doações de roupas da SANEM, visto que faz parte da disciplina de Oficina de Computação para a Comunidade, e tem como objetivos criar uma aplicação confiável, escalável e viável para a instituição. 
+O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumprindo as necessidades dos usuários e fazendo o controle de doações.
 
 ---
 
 ## 🚀 Tecnologias
 
-- React
-- Typescript
-- Express
-- PostgreeSQL
-- Docker
+-Front end
+React
+-Back end:
+(em desenvolvimento)
 
 ---
 
