@@ -35,42 +35,13 @@ O nosso projeto se propõe a resolver a problemática das doações de roupas da
 
 ## ⚙️ Instalação
 
-Siga os passos para rodar o projeto localmente:
-
-1 - Clonar repositório
-
-- criar nova pasta;
-- abrir pasta no vscode
-- ctrl+' (abre o terminal)
-- digitar no terminal git clone https://github.com/HerickCallegari/SANEMServer.git
-- criar um arquivo chamado dev.env na pasta root da aplicação e colocar o seguinte texto:
-
-DATABASE_USER=Admin
-DATABASE_PASSWORD=Admin123
-
-2 - Para rodar a aplicação
-2.1 para rodar o servidor na maquina, sem ser através do Docker
-
-- digitar no terminal npm run dev para rodar
-  2.2 para rodar usando Docker
-- Digitar no terminal do programa ( dentro do caminho dele)
-- Docker build -t my-node-app . ( para criar a imagem Docker)
-- docker-compose up ( para criar o container Docker)
-- verificar no Docker se esta rodando tanto o servidor quanto o banco de dados
-
-3. para testar o banco e fazer consultas direto nele
-
-- docker exec -it postgres psql -U user123 -d SanemDB; ( esse comando vai abrir o terminal do banco)
-- Se divertir fazendo consultas e operações
+(em breve)
 
 ---
 
 ## 🧪 Como usar
 
-1. Faça login como voluntário.
-2. Cadastre itens, beneficiários e voluntários.
-3. Gere movimentações de entrada e saída.
-4. Acompanhe o estoque em tempo real.
+(em breve)
 
 ---
 
