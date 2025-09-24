@@ -19,7 +19,7 @@ Um sistema de gerenciamento de estoque feito com Express e React.
 
 ## 📦 Sobre o Projeto
 
-O nosso projeto se propõe a resolver a problemática das doações de roupas da SANEM, visto que faz parte da disciplina de Oficina de Computação para a Comunidade (COM1029-2025/1), e tem como objetivos criar uma aplicação confiável, escalável e viável para a instituição.
+O nosso projeto se propõe a resolver a problemática das doações de roupas da SANEM, visto que faz parte da disciplina de Oficina de Computação para a Comunidade, e tem como objetivos criar uma aplicação confiável, escalável e viável para a instituição. 
 
 ---
 
@@ -48,8 +48,8 @@ O nosso projeto se propõe a resolver a problemática das doações de roupas da
 ## 📄 Documentação
 
 [Documentação](https://docs.google.com/document/d/1Wcm7rU8M-KzOWyroloNW2MCT5hMKPz27V5oUWZ41BAA/edit?tab=t.0#heading=h.t5lws1x1u33z)
-[Prototipação](https://www.figma.com/design/Nw6ZMXU4QDHtnW0xVftRn1/Untitled?node-id=0-1&t=Ecz3DBGmvg3mjTuf-1).
-[Trello](https://trello.com/invite/b/67e30a8d5b7a21524c2541ac/ATTI536628c2633e8b3c378224e702e822b7F186A0A2/brancho).
+[Prototipação](em breve).
+[Trello](em breve).
 
 ---
 
