@@ -109,7 +109,7 @@ Apenas membros da equipe Quarteto Fantástico podem contribuir nesse projeto. En
 
 ### Segundo Semestre
 
-- [Henrique Vicente Iha](https://github.com/catchdark) : Front End
+- [Rodrigo](https://github.com/Ordered0) : Front End
 - [Luiz Felipe Bastião](https://github.com/LuizFelipeBastiao) : Back End
 - [Murilo Pistore Moreira Ramos](https://github.com/thebud4) : Ajuda Geral
 
