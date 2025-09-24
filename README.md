@@ -79,9 +79,9 @@ Apenas membros da equipe Quarteto Fantástico podem contribuir nesse projeto. En
 
 ### Segundo Semestre
 
-- [Rodrigo Caio Koelln Alfonsin](https://github.com/Ordered0) : Front End
-- [Luiz Felipe Bastião](https://github.com/LuizFelipeBastiao) : Back End
-- [Murilo Pistore Moreira Ramos](https://github.com/thebud4) : Ajuda Geral
+- [Rodrigo Caio Koelln Alfonsin](https://github.com/Ordered0) : Front/Back End
+- [Luiz Felipe Bastião](https://github.com/LuizFelipeBastiao) : Front/Back End
+- [Murilo Pistore Moreira Ramos](https://github.com/thebud4) : Scrum Master e Ajuda Geral
 - [Yasmin Yamamoto de Melo](https://github.com/Yasmin-YY) : Front End
 
 ---
