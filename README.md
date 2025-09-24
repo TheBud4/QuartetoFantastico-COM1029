@@ -87,3 +87,4 @@ Apenas membros da equipe Quarteto Fantástico podem contribuir nesse projeto. En
 ---
 
 ## 📄 Licença
+Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para mais informações.
