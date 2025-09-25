@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 
 const app = express();
 
-// Define a porta em que o servidor irá ouvir
 const PORT = 3000;
 
 /**
