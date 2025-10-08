@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
-
+import env from "./config/env";
 const app = express();
-
-const PORT = 3000;
 
 /**
  * @route GET /
@@ -16,6 +14,6 @@ app.get("/", (req: Request, res: Response) => {
 /**
  * Inicia o servidor e fica à escuta na porta definida.
  */
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+app.listen(env.PORT, () => {
+  console.log(`Server running at http://localhost:${env.PORT}`);
 });
