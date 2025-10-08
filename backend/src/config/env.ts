@@ -18,4 +18,12 @@ const env: EnvConfig = {
     POSTGRES_DB: process.env.POSTGRES_DB || '',
 };
 
+const requiredKeys: (keyof EnvConfig)[] = ['DATABASE_URL', 'POSTGRES_USER', 'POSTGRES_PASSWORD', 'POSTGRES_DB'];
+
+for (const key of requiredKeys) {
+    if (!env[key]) {
+        throw new Error(`${key} não está definida nas variáveis de ambiente.`);
+    }
+}
+
 export default env;
