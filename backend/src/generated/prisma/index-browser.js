@@ -120,9 +120,104 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.VoluntarioScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  email: 'email',
+  senha: 'senha',
+  endereco: 'endereco',
+  telefone: 'telefone',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BeneficiarioScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  cpf: 'cpf',
+  telefone: 'telefone',
+  endereco: 'endereco',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DoacaoScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  voluntarioId: 'voluntarioId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ItemDoacaoScalarFieldEnum = {
+  id: 'id',
+  quantidade: 'quantidade',
+  doacaoId: 'doacaoId',
+  itemId: 'itemId'
+};
+
+exports.Prisma.DistribuicaoScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  voluntarioId: 'voluntarioId',
+  beneficiarioId: 'beneficiarioId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ItemDistribuicaoScalarFieldEnum = {
+  id: 'id',
+  quantidade: 'quantidade',
+  distribuicaoId: 'distribuicaoId',
+  itemId: 'itemId'
+};
+
+exports.Prisma.ItemScalarFieldEnum = {
+  id: 'id',
+  quantidadeEstoque: 'quantidadeEstoque',
+  tipoId: 'tipoId',
+  tamanhoId: 'tamanhoId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TipoScalarFieldEnum = {
+  id: 'id',
+  descricao: 'descricao'
+};
+
+exports.Prisma.TamanhoScalarFieldEnum = {
+  id: 'id',
+  descricao: 'descricao',
+  tipoId: 'tipoId'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 
 exports.Prisma.ModelName = {
-
+  Voluntario: 'Voluntario',
+  Beneficiario: 'Beneficiario',
+  Doacao: 'Doacao',
+  ItemDoacao: 'ItemDoacao',
+  Distribuicao: 'Distribuicao',
+  ItemDistribuicao: 'ItemDistribuicao',
+  Item: 'Item',
+  Tipo: 'Tipo',
+  Tamanho: 'Tamanho'
 };
 
 /**

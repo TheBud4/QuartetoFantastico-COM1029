@@ -92,9 +92,104 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.VoluntarioScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  email: 'email',
+  senha: 'senha',
+  endereco: 'endereco',
+  telefone: 'telefone',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.BeneficiarioScalarFieldEnum = {
+  id: 'id',
+  nome: 'nome',
+  cpf: 'cpf',
+  telefone: 'telefone',
+  endereco: 'endereco',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.DoacaoScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  voluntarioId: 'voluntarioId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ItemDoacaoScalarFieldEnum = {
+  id: 'id',
+  quantidade: 'quantidade',
+  doacaoId: 'doacaoId',
+  itemId: 'itemId'
+};
+
+exports.Prisma.DistribuicaoScalarFieldEnum = {
+  id: 'id',
+  data: 'data',
+  voluntarioId: 'voluntarioId',
+  beneficiarioId: 'beneficiarioId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.ItemDistribuicaoScalarFieldEnum = {
+  id: 'id',
+  quantidade: 'quantidade',
+  distribuicaoId: 'distribuicaoId',
+  itemId: 'itemId'
+};
+
+exports.Prisma.ItemScalarFieldEnum = {
+  id: 'id',
+  quantidadeEstoque: 'quantidadeEstoque',
+  tipoId: 'tipoId',
+  tamanhoId: 'tamanhoId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.TipoScalarFieldEnum = {
+  id: 'id',
+  descricao: 'descricao'
+};
+
+exports.Prisma.TamanhoScalarFieldEnum = {
+  id: 'id',
+  descricao: 'descricao',
+  tipoId: 'tipoId'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+
 
 exports.Prisma.ModelName = {
-
+  Voluntario: 'Voluntario',
+  Beneficiario: 'Beneficiario',
+  Doacao: 'Doacao',
+  ItemDoacao: 'ItemDoacao',
+  Distribuicao: 'Distribuicao',
+  ItemDistribuicao: 'ItemDistribuicao',
+  Item: 'Item',
+  Tipo: 'Tipo',
+  Tamanho: 'Tamanho'
 };
 /**
  * Create the Client
@@ -107,7 +202,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/thebud4/www/Projetos/QuartetoFantastico-COM1029/backend/src/generated/prisma",
+      "value": "/usr/src/app/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -116,12 +211,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "linux-musl-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/thebud4/www/Projetos/QuartetoFantastico-COM1029/backend/prisma/schema.prisma",
+    "sourceFilePath": "/usr/src/app/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -135,7 +230,6 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -144,13 +238,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n",
-  "inlineSchemaHash": "f4defb510352aeb258e32fd0e4e744b44176032e921a554a415dd34c135bd53c",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\n// ===========================================\n// Modelagem do Banco de Dados para o Sistema de Doações\n// ===========================================\n\nmodel Voluntario {\n  id        Int      @id @default(autoincrement())\n  nome      String\n  email     String   @unique\n  // ATENÇÃO: A senha deve ser armazenada como um hash (ex: bcrypt)\n  senha     String\n  endereco  String?\n  telefone  String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  doacoes       Doacao[]\n  distribuicoes Distribuicao[]\n}\n\nmodel Beneficiario {\n  id        Int      @id @default(autoincrement())\n  nome      String\n  cpf       String   @unique\n  telefone  String?\n  endereco  String?\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  distribuicoes Distribuicao[]\n}\n\nmodel Doacao {\n  id           Int      @id @default(autoincrement())\n  data         DateTime @default(now())\n  voluntarioId Int\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  voluntario Voluntario   @relation(fields: [voluntarioId], references: [id])\n  itens      ItemDoacao[]\n}\n\nmodel ItemDoacao {\n  id         Int @id @default(autoincrement())\n  quantidade Int\n  doacaoId   Int\n  itemId     Int\n\n  doacao Doacao @relation(fields: [doacaoId], references: [id])\n  item   Item   @relation(fields: [itemId], references: [id])\n}\n\nmodel Distribuicao {\n  id             Int      @id @default(autoincrement())\n  data           DateTime @default(now())\n  voluntarioId   Int\n  beneficiarioId Int\n  createdAt      DateTime @default(now())\n  updatedAt      DateTime @updatedAt\n\n  voluntario   Voluntario         @relation(fields: [voluntarioId], references: [id])\n  beneficiario Beneficiario       @relation(fields: [beneficiarioId], references: [id])\n  itens        ItemDistribuicao[]\n}\n\nmodel ItemDistribuicao {\n  id             Int @id @default(autoincrement())\n  quantidade     Int\n  distribuicaoId Int\n  itemId         Int\n\n  distribuicao Distribuicao @relation(fields: [distribuicaoId], references: [id])\n  item         Item         @relation(fields: [itemId], references: [id])\n}\n\nmodel Item {\n  id                Int      @id @default(autoincrement())\n  quantidadeEstoque Int      @map(\"quantidade\")\n  tipoId            Int\n  tamanhoId         Int\n  createdAt         DateTime @default(now())\n  updatedAt         DateTime @updatedAt\n\n  tipo     Tipo               @relation(fields: [tipoId], references: [id])\n  tamanho  Tamanho            @relation(fields: [tamanhoId], references: [id])\n  entradas ItemDoacao[]\n  saidas   ItemDistribuicao[]\n}\n\nmodel Tipo {\n  id        Int    @id @default(autoincrement())\n  descricao String @unique\n\n  tamanhos Tamanho[]\n  itens    Item[]\n}\n\nmodel Tamanho {\n  id        Int    @id @default(autoincrement())\n  descricao String\n  tipoId    Int\n\n  tipo  Tipo   @relation(fields: [tipoId], references: [id])\n  itens Item[]\n\n  @@unique([descricao, tipoId])\n}\n",
+  "inlineSchemaHash": "7a885df2196875c701ba3fa5630a586c84bb518373885e276a0d8c283dd346c4",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"Voluntario\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"nome\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"senha\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"endereco\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"telefone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"doacoes\",\"kind\":\"object\",\"type\":\"Doacao\",\"relationName\":\"DoacaoToVoluntario\"},{\"name\":\"distribuicoes\",\"kind\":\"object\",\"type\":\"Distribuicao\",\"relationName\":\"DistribuicaoToVoluntario\"}],\"dbName\":null},\"Beneficiario\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"nome\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"cpf\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"telefone\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"endereco\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"distribuicoes\",\"kind\":\"object\",\"type\":\"Distribuicao\",\"relationName\":\"BeneficiarioToDistribuicao\"}],\"dbName\":null},\"Doacao\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"data\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"voluntarioId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"voluntario\",\"kind\":\"object\",\"type\":\"Voluntario\",\"relationName\":\"DoacaoToVoluntario\"},{\"name\":\"itens\",\"kind\":\"object\",\"type\":\"ItemDoacao\",\"relationName\":\"DoacaoToItemDoacao\"}],\"dbName\":null},\"ItemDoacao\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"quantidade\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"doacaoId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"itemId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"doacao\",\"kind\":\"object\",\"type\":\"Doacao\",\"relationName\":\"DoacaoToItemDoacao\"},{\"name\":\"item\",\"kind\":\"object\",\"type\":\"Item\",\"relationName\":\"ItemToItemDoacao\"}],\"dbName\":null},\"Distribuicao\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"data\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"voluntarioId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"beneficiarioId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"voluntario\",\"kind\":\"object\",\"type\":\"Voluntario\",\"relationName\":\"DistribuicaoToVoluntario\"},{\"name\":\"beneficiario\",\"kind\":\"object\",\"type\":\"Beneficiario\",\"relationName\":\"BeneficiarioToDistribuicao\"},{\"name\":\"itens\",\"kind\":\"object\",\"type\":\"ItemDistribuicao\",\"relationName\":\"DistribuicaoToItemDistribuicao\"}],\"dbName\":null},\"ItemDistribuicao\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"quantidade\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"distribuicaoId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"itemId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"distribuicao\",\"kind\":\"object\",\"type\":\"Distribuicao\",\"relationName\":\"DistribuicaoToItemDistribuicao\"},{\"name\":\"item\",\"kind\":\"object\",\"type\":\"Item\",\"relationName\":\"ItemToItemDistribuicao\"}],\"dbName\":null},\"Item\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"quantidadeEstoque\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"quantidade\"},{\"name\":\"tipoId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"tamanhoId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"tipo\",\"kind\":\"object\",\"type\":\"Tipo\",\"relationName\":\"ItemToTipo\"},{\"name\":\"tamanho\",\"kind\":\"object\",\"type\":\"Tamanho\",\"relationName\":\"ItemToTamanho\"},{\"name\":\"entradas\",\"kind\":\"object\",\"type\":\"ItemDoacao\",\"relationName\":\"ItemToItemDoacao\"},{\"name\":\"saidas\",\"kind\":\"object\",\"type\":\"ItemDistribuicao\",\"relationName\":\"ItemToItemDistribuicao\"}],\"dbName\":null},\"Tipo\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"descricao\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tamanhos\",\"kind\":\"object\",\"type\":\"Tamanho\",\"relationName\":\"TamanhoToTipo\"},{\"name\":\"itens\",\"kind\":\"object\",\"type\":\"Item\",\"relationName\":\"ItemToTipo\"}],\"dbName\":null},\"Tamanho\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"descricao\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"tipoId\",\"kind\":\"scalar\",\"type\":\"Int\"},{\"name\":\"tipo\",\"kind\":\"object\",\"type\":\"Tipo\",\"relationName\":\"TamanhoToTipo\"},{\"name\":\"itens\",\"kind\":\"object\",\"type\":\"Item\",\"relationName\":\"ItemToTamanho\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),
