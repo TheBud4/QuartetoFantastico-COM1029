@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import env from "./config/env";
+import startServer from "./scripts/startServer";
 const app = express();
 
 /**
@@ -11,9 +11,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
 });
 
-/**
- * Inicia o servidor e fica à escuta na porta definida.
- */
-app.listen(env.PORT, () => {
-  console.log(`Server running at http://localhost:${env.PORT}`);
-});
+// Inicia o servidor e fica à escuta na porta definida.
+startServer(app);
+
