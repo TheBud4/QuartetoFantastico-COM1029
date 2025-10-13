@@ -26,6 +26,19 @@ model Voluntario {
   distribuicoes Distribuicao[]
 }
 
+model CartaoBeneficiario {
+  id              Int      @id @default(autoincrement())
+  numeroCartao    String   @unique
+  dataValidade    DateTime
+  ativo           Boolean  @default(true)
+  codigoSeguranca String
+  beneficiarioId  Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  Beneficiario Beneficiario @relation("BeneficiarioToCartao", fields: [beneficiarioId], references: [id])
+}
+
 model Beneficiario {
   id        Int      @id @default(autoincrement())
   nome      String
@@ -36,6 +49,7 @@ model Beneficiario {
   updatedAt DateTime @updatedAt
 
   distribuicoes Distribuicao[]
+  cartoes       CartaoBeneficiario[] @relation("BeneficiarioToCartao")
 }
 
 model Doacao {
@@ -86,6 +100,7 @@ model Item {
   id                Int      @id @default(autoincrement())
   quantidadeEstoque Int      @map("quantidade")
   tipoId            Int
+  descricao         String
   tamanhoId         Int
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt

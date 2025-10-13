@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import startServer from "./scripts/startServer";
+
+
 const app = express();
 
 /**
@@ -9,6 +11,7 @@ const app = express();
  */
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
+  
 });
 
 // Inicia o servidor e fica à escuta na porta definida.
