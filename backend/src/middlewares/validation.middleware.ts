@@ -5,9 +5,9 @@ export const validate = (schema: z.ZodSchema) => {
     return (req: Request, res: Response, next: NextFunction) => {
         const result = schema.safeParse(req.body);
         if (!result.success) {
-            return res.status(400).json({ error: result.error.message });
+            return res.status(400).json({ "Erro grave": result.error.message });
         }
-        req.body = result.data; // Optional: assign validated data back to req.body
+        req.body = result.data; // Atualiza o corpo da requisição com os dados validados
         next();
     };
 };

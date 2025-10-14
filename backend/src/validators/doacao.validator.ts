@@ -10,8 +10,6 @@ const itemSchema = z.object({
 
 // Schema principal para o corpo da requisição de criação de doação
 export const createDoacaoSchema = z.object({
-  body: z.object({
     voluntarioId: z.number('O ID do voluntário é obrigatório.'),
     itens: z.array(itemSchema).min(1, 'A doação deve conter pelo menos um item.'),
-  }),
 });
