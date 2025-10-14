@@ -120,12 +120,35 @@ Este documento descreve a estrutura da API RESTful para o Sistema de Gerenciamen
 
 ---
 
-## Gerenciamento de Tipos e Tamanhos (Catálogo)
+## Gerenciamento de Características de Ítens do Catálogo
+
+
+### Gerenciamento de Tipos
 
 -   `GET /tipos`
     -   **Descrição:** Lista todos os tipos de itens para popular formulários.
     -   **Perfil de Acesso:** Administrador, Voluntário.
 
+### Gerenciamento de Tamanhos
+
 -   `GET /tamanhos`
     -   **Descrição:** Lista todos os tamanhos, permitindo filtrar por tipo (ex: `?tipoId=1`).
+    -   **Perfil de Acesso:** Administrador, Voluntário.
+
+### Gerenciamento de Condições
+
+-   `GET /condicoes`
+    -   **Descrição:** Lista todas as condições de um item ("Novo","Usado","Pouco Usado").
+    -   **Perfil de Acesso:** Administrador, Voluntário.
+
+-   `POST /condicoes`
+    -   **Descrição:** Adiciona uma nova condição na lista.
+    -   **Perfil de Acesso:** Administrador, Voluntário.
+
+-   `PUT /condicoes`
+    -   **Descrição:** Edita uma condição usando o id.
+    -   **Perfil de Acesso:** Administrador, Voluntário.
+
+-   `DELETE /condicoes`
+    -   **Descrição:** Lista todas as condições de um item ("Novo","Usado","Pouco Usado")
     -   **Perfil de Acesso:** Administrador, Voluntário.

@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 // Schema para cada item individual na lista de doação
 const itemSchema = z.object({
-  tipo: z.string('O tipo do item é obrigatório.'),
-  descricao: z.string('A descrição do item é obrigatória.'),
-  tamanho: z.string('O tamanho do item é obrigatório.'),
+  tipoId: z.int('O tipo do item é obrigatório.'),
+  tamanhoId: z.int('O tamanho do item é obrigatório.'),
+  condicaoId: z.int('A condição do item é obrigatória.'),
   quantidade: z.number('A quantidade é obrigatória.').positive('A quantidade deve ser maior que zero.'),
 });
 
