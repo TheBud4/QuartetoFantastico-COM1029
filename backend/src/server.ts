@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
 import startServer from "./scripts/startServer";
-
+import doacaoRoutes from './routes/doacao.routes';
 
 const app = express();
+app.use(express.json()); // Middleware para interpretar JSON no corpo das requisições
 
 /**
  * @route GET /
@@ -13,7 +14,8 @@ app.get("/", (req: Request, res: Response) => {
   res.send("Hello, World!");
   
 });
+app.use('/doacoes', doacaoRoutes);
 
-// Inicia o servidor e fica à escuta na porta definida.
+
 startServer(app);
 
