@@ -19,10 +19,10 @@ const router = Router();
  *   get:
  *     summary: Lista todas as condições
  *     tags: [Condições]
- *     description: "Retorna uma lista de todas as condições de itens disponíveis para cadastro no sistema. Esta rota é usada para popular formulários no frontend."
+ *     description: "Retorna uma lista de todas as condições de itens (ex: 'Novo', 'Usado - Bom estado') disponíveis para cadastro no sistema. Esta rota é ideal para popular menus de seleção (dropdowns) no frontend."
  *     responses:
- *       "200":
- *         description: "Lista de condições retornada com sucesso."
+ *       '200':
+ *         description: Uma lista de condições foi retornada com sucesso.
  *         content:
  *           application/json:
  *             schema:
@@ -32,13 +32,23 @@ const router = Router();
  *                 properties:
  *                   id:
  *                     type: integer
+ *                     description: O ID único da condição.
  *                     example: 1
  *                   descricao:
  *                     type: string
+ *                     description: A descrição da condição.
  *                     example: "Novo, com etiqueta"
- *       "500":
- *         description: "Erro interno do servidor."
-*/
+ *       '500':
+ *         description: Ocorreu um erro inesperado no servidor ao tentar buscar os dados.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Erro ao buscar as condições."
+ */
 router.get('/', getAllCondicoesController);
 
 /**
