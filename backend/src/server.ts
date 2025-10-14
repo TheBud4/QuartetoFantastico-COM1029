@@ -1,5 +1,8 @@
 import express, { Request, Response } from "express";
 import startServer from "./scripts/startServer";
+import { setupSwagger } from "./config/swagger";
+
+
 // Importa as rotas de doação
 import doacaoRoutes from './routes/doacao.routes';
 // Importa as rotas de tipo tamanho e condicao
@@ -10,17 +13,16 @@ import condicaoRoutes from './routes/condicao.routes';
 const app = express();
 app.use(express.json()); // Middleware para interpretar JSON no corpo das requisições
 
-/**
- * @route GET /
- * @description Rota Hello World (feita por superstição rs)
- * @access Público
- */
+setupSwagger(app);
+
+
 app.get("/", (req: Request, res: Response) => {
-  const request =req.body;
-  res.send(request);
-  //res.send("Hello, World!");
-  
+  res.send({
+    "Hello": "World"
+  });
+
 });
+
 
 // Rotas de doação
 app.use('/doacoes', doacaoRoutes);

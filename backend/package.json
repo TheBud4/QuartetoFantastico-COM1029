@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.ts",
   "scripts": {
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate --no-hints",
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "prisma generate && tsx watch src/server.ts"
@@ -16,11 +16,15 @@
   "dependencies": {
     "@prisma/client": "^6.17.1",
     "express": "^5.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^6.16.2",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.6",

@@ -5,7 +5,10 @@ export const createCondicaoController = async (req: Request, res: Response) => {
   try {
     const { descricao } = req.body;
     const novaCondicao = await createCondicaoService(descricao);
-    return res.status(201).json(novaCondicao);
+    return res.status(201).json({
+      message: 'Condição criada com sucesso.',
+      novaCondicao
+    });
   } catch (error: any) {
     if (error.message.includes('já está cadastrada')) {
       return res.status(409).json({ message: error.message });
