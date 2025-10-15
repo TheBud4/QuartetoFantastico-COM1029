@@ -9,12 +9,20 @@ const router = Router();
  * @openapi
  * tags:
  *   - name: Condições
- *     description: "Endpoints para gerenciar as condições de conservação dos itens (Novo, Usado, etc.)."
+ *     description: "Endpoints para gerenciar as condições de conservação dos itens (ex: 'Novo', 'Usado', etc.)."
  * components:
  *   schemas:
  *     Condicao:
  *       type: object
- *       properties: { id: { type: integer }, descricao: { type: string } }
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: "O ID único da condição."
+ *           example: 1
+ *         descricao:
+ *           type: string
+ *           description: "A descrição da condição."
+ *           example: "Novo, com etiqueta"
  */
 
 

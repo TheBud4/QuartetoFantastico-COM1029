@@ -10,8 +10,25 @@ const router = Router();
  * @openapi
  * tags:
  *   - name: Tamanhos
- *     description: "Endpoints para gerenciar os tamanhos dos itens (P, M, G, etc.)."
-*/
+ *     description: "Endpoints para gerenciar os tamanhos dos itens (ex: 'G', '42'), que são sempre vinculados a um Tipo."
+ * components:
+ *   schemas:
+ *     Tamanho:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: "O ID do tamanho."
+ *           example: 1
+ *         descricao:
+ *           type: string
+ *           description: "A descrição do tamanho."
+ *           example: "G"
+ *         tipoId:
+ *           type: integer
+ *           description: "O ID do Tipo ao qual este tamanho pertence."
+ *           example: 1
+ */
 
 /**
  * @access Voluntários/Admins
