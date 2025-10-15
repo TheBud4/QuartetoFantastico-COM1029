@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middlewares/validation.middleware';
 import { createCondicaoSchema } from '../validators/condicao.validator';
-import { createCondicaoController, getAllCondicoesController } from '../controllers/condicao.controller';
+import { createCondicaoController, getAllCondicoesController, deleteCondicaoController, getCondicaoByIdController, updateCondicaoController } from '../controllers/condicao.controller';
 
 const router = Router();
 
@@ -10,7 +10,12 @@ const router = Router();
  * tags:
  *   - name: Condições
  *     description: "Endpoints para gerenciar as condições de conservação dos itens (Novo, Usado, etc.)."
-*/
+ * components:
+ *   schemas:
+ *     Condicao:
+ *       type: object
+ *       properties: { id: { type: integer }, descricao: { type: string } }
+ */
 
 
 /**
@@ -28,16 +33,7 @@ const router = Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     description: O ID único da condição.
- *                     example: 1
- *                   descricao:
- *                     type: string
- *                     description: A descrição da condição.
- *                     example: "Novo, com etiqueta"
+ *                 $ref: '#/components/schemas/Condicao'
  *       '500':
  *         description: Ocorreu um erro inesperado no servidor ao tentar buscar os dados.
  *         content:
@@ -50,6 +46,50 @@ const router = Router();
  *                   example: "Erro ao buscar as condições."
  */
 router.get('/', getAllCondicoesController);
+
+/**
+ * @openapi
+ * /condicoes/{id}:
+ *   get:
+ *     summary: Busca uma condição por ID
+ *     tags: [Condições]
+ *     description: Retorna os detalhes de uma condição específica com base no seu ID. É útil para preencher um formulário de edição, por exemplo.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID numérico da condição a ser buscada.
+ *     responses:
+ *       '200':
+ *         description: Detalhes da condição retornados com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Condicao'
+ *       '404':
+ *         description: A condição com o ID especificado não foi encontrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Condição não encontrada."
+ *       '500':
+ *         description: Ocorreu um erro inesperado no servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Erro ao buscar a condição."
+ */
+router.get('/:id', getCondicaoByIdController);
 
 /**
  * @openapi
@@ -77,14 +117,7 @@ router.get('/', getAllCondicoesController);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 5
- *                 descricao:
- *                   type: string
- *                   example: "Usado - Necessita reparos"
+ *               $ref: '#/components/schemas/Condicao'
  *       "400":
  *         description: "Requisição inválida. O corpo da requisição não atende aos critérios de validação."
  *         content:
@@ -136,31 +169,125 @@ router.post('/', validate(createCondicaoSchema), createCondicaoController);
 
 /**
  * @openapi
- * /condicoes:
+ * /condicoes/{id}:
  *   put:
- *    summary: Ainda não implementado
- *    tags: [Condições]
- *    description: "Rota reservada para futuras implementações."
- *    responses:
- *      "501":
- *        description: "Não implementado."
+ *     summary: Atualiza uma condição existente
+ *     tags: [Condições]
+ *     description: Atualiza a descrição de uma condição específica com base no seu ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID numérico da condição a ser atualizada.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - descricao
+ *             properties:
+ *               descricao:
+ *                 type: string
+ *                 description: A nova descrição para a condição.
+ *                 example: "Usado - Com pequenos detalhes"
+ *     responses:
+ *       '200':
+ *         description: Condição atualizada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Condição atualizada com sucesso."
+ *                 condicaoAtualizada:
+ *                   $ref: '#/components/schemas/Condicao'
+ *       '404':
+ *         description: A condição com o ID especificado não foi encontrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Condição não encontrada."
+ *       '409':
+ *         description: Conflito. A nova descrição fornecida já está em uso por outra condição.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Esta condição já está cadastrada."
+ *       '500':
+ *         description: Ocorreu um erro inesperado no servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Erro ao atualizar a condição."
  */
-router.put('/', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented' });
-});
+router.put('/:id', updateCondicaoController);
+
 /**
  * @openapi
- * /condicoes:
+ * /condicoes/{id}:
  *   delete:
- *    summary: Ainda não implementado
- *    tags: [Condições]
- *    description: "Rota reservada para futuras implementações."
- *    responses:
- *      "501":
- *        description: "Não implementado."
+ *     summary: Remove uma condição
+ *     tags: [Condições]
+ *     description: Remove uma condição do catálogo com base no seu ID. A operação falhará se a condição estiver em uso por um ou mais itens no estoque. Retornará 204 "No Content" em caso de sucesso.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: O ID numérico da condição a ser removida.
+ *     responses:
+ *       '204':
+ *         description: Condição removida com sucesso. A resposta não contém corpo (No Content).
+ *       '400':
+ *         description: Requisição inválida. A condição não pode ser removida porque está em uso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Esta condição está em uso por um ou mais itens e não pode ser removida."
+ *       '404':
+ *         description: A condição com o ID especificado não foi encontrada.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Condição não encontrada."
+ *       '500':
+ *         description: Ocorreu um erro inesperado no servidor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Erro ao deletar a condição."
  */
-router.delete('/', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented' });
-});
+router.delete('/:id', deleteCondicaoController);
 
 export default router;
