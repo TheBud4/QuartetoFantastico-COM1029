@@ -7,7 +7,7 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API do Sistema de Doações SANEM',
+      title: 'Sistema de Doações SANEM',
       version: '1.0.0',
       description:
         `Documentação 
