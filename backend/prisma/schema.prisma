@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -16,15 +15,28 @@ model Voluntario {
   id        Int      @id @default(autoincrement())
   nome      String
   email     String   @unique
-  // ATENÇÃO: A senha deve ser armazenada como um hash (ex: bcrypt)
+  admin     Boolean  @default(false)
   senha     String
   endereco  String?
   telefone  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("dataCriacao")
+  updatedAt DateTime @updatedAt @map("dataAtualizacao")
 
   doacoes       Doacao[]
   distribuicoes Distribuicao[]
+}
+
+model CartaoBeneficiario {
+  id              Int      @id @default(autoincrement())
+  numeroCartao    String   @unique
+  dataValidade    DateTime
+  ativo           Boolean  @default(false)
+  codigoSeguranca String
+  beneficiarioId  Int
+  createdAt       DateTime @default(now()) @map("dataCriacao")
+  updatedAt       DateTime @updatedAt @map("dataAtualizacao")
+
+  Beneficiario Beneficiario @relation("BeneficiarioToCartao", fields: [beneficiarioId], references: [id])
 }
 
 model Beneficiario {
@@ -33,18 +45,18 @@ model Beneficiario {
   cpf       String   @unique
   telefone  String?
   endereco  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("dataCriacao")
+  updatedAt DateTime @updatedAt @map("dataAtualizacao")
 
   distribuicoes Distribuicao[]
+  cartoes       CartaoBeneficiario[] @relation("BeneficiarioToCartao")
 }
 
 model Doacao {
   id           Int      @id @default(autoincrement())
-  data         DateTime @default(now())
   voluntarioId Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now()) @map("dataCriacao")
+  updatedAt    DateTime @updatedAt @map("dataAtualizacao")
 
   voluntario Voluntario   @relation(fields: [voluntarioId], references: [id])
   itens      ItemDoacao[]
@@ -62,11 +74,10 @@ model ItemDoacao {
 
 model Distribuicao {
   id             Int      @id @default(autoincrement())
-  data           DateTime @default(now())
   voluntarioId   Int
   beneficiarioId Int
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now()) @map("dataCriacao")
+  updatedAt      DateTime @updatedAt @map("dataAtualizacao")
 
   voluntario   Voluntario         @relation(fields: [voluntarioId], references: [id])
   beneficiario Beneficiario       @relation(fields: [beneficiarioId], references: [id])
@@ -86,23 +97,26 @@ model ItemDistribuicao {
 model Item {
   id                Int      @id @default(autoincrement())
   quantidadeEstoque Int      @map("quantidade")
+  condicaoId        Int
   tipoId            Int
   tamanhoId         Int
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now()) @map("dataCriacao")
+  updatedAt         DateTime @updatedAt @map("dataAtualizacao")
 
   tipo     Tipo               @relation(fields: [tipoId], references: [id])
   tamanho  Tamanho            @relation(fields: [tamanhoId], references: [id])
+  condicao Condicao           @relation(fields: [condicaoId], references: [id])
   entradas ItemDoacao[]
   saidas   ItemDistribuicao[]
+
+  @@unique([tipoId, tamanhoId, condicaoId])
 }
 
 model Tipo {
-  id        Int    @id @default(autoincrement())
-  descricao String @unique
-
-  tamanhos Tamanho[]
-  itens    Item[]
+  id        Int       @id @default(autoincrement())
+  descricao String    @unique
+  itens     Item[]
+  tamanhos  Tamanho[]
 }
 
 model Tamanho {
@@ -114,4 +128,10 @@ model Tamanho {
   itens Item[]
 
   @@unique([descricao, tipoId])
+}
+
+model Condicao {
+  id        Int    @id @default(autoincrement())
+  descricao String @unique
+  itens     Item[]
 }

@@ -1,19 +1,35 @@
 import express, { Request, Response } from "express";
-import env from "./config/env";
+import startServer from "./scripts/startServer";
+import { setupSwagger } from "./config/swagger";
+
+// Importa as rotas de doação
+import doacaoRoutes from './routes/doacao.routes';
+// Importa as rotas de tipo tamanho e condicao
+import tipoRoutes from './routes/tipo.routes';
+import tamanhoRoutes from './routes/tamanho.routes';
+import condicaoRoutes from './routes/condicao.routes';
+
 const app = express();
+app.use(express.json());
 
-/**
- * @route GET /
- * @description Rota principal da aplicação.
- * @access Público
- */
+setupSwagger(app);
+
+
 app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, World!");
+  res.send({
+    "Hello": "World"
+  });
+
 });
 
-/**
- * Inicia o servidor e fica à escuta na porta definida.
- */
-app.listen(env.PORT, () => {
-  console.log(`Server running at http://localhost:${env.PORT}`);
-});
+
+// Rotas de doação
+app.use('/doacoes', doacaoRoutes);
+
+// Rotas de tipo, tamanho e condição
+app.use('/tipos', tipoRoutes);
+app.use('/tamanhos', tamanhoRoutes);
+app.use('/condicoes', condicaoRoutes);
+
+startServer(app);
+
