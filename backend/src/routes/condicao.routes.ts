@@ -208,13 +208,7 @@ router.post('/', validate(createCondicaoSchema), createCondicaoController);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Condição atualizada com sucesso."
- *                 condicaoAtualizada:
- *                   $ref: '#/components/schemas/Condicao'
+ *              $ref: '#/components/schemas/Condicao'
  *       '404':
  *         description: A condição com o ID especificado não foi encontrada.
  *         content:
