@@ -4,7 +4,6 @@ import { createTamanhoSchema } from '../validators/tamanho.validator';
 import { createTamanhoController, getAllTamanhosController, getTamanhoByIdController, updateTamanhoController, deleteTamanhoController } from '../controllers/tamanho.controller';
 
 const router = Router();
-// TODO: Adicionar middleware de autorização para garantir que apenas Admins ou Voluntários possam criar
 
 /**
  * @openapi

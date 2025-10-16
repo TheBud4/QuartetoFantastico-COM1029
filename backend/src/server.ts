@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import startServer from "./scripts/startServer";
 import { setupSwagger } from "./config/swagger";
 
-
 // Importa as rotas de doação
 import doacaoRoutes from './routes/doacao.routes';
 // Importa as rotas de tipo tamanho e condicao
@@ -11,7 +10,7 @@ import tamanhoRoutes from './routes/tamanho.routes';
 import condicaoRoutes from './routes/condicao.routes';
 
 const app = express();
-app.use(express.json()); // Middleware para interpretar JSON no corpo das requisições
+app.use(express.json());
 
 setupSwagger(app);
 
