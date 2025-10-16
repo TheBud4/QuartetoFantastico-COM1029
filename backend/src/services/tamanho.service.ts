@@ -73,7 +73,7 @@ export const deleteTamanhoService = async (id: number) => {
   });
 
   if (itensUsandoTamanho > 0) {
-    throw new Error('Este tamanho está em uso por um ou mais itens e не pode ser removido.');
+    throw new Error('Este tamanho está em uso por um ou mais itens e não pode ser removido.');
   }
 
   return prisma.tamanho.delete({ where: { id: tamanho.id } });

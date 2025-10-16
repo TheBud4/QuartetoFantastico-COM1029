@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middlewares/validation.middleware';
 import { createTamanhoSchema } from '../validators/tamanho.validator';
-import { createTamanhoController, getAllTamanhosController } from '../controllers/tamanho.controller';
+import { createTamanhoController, getAllTamanhosController, getTamanhoByIdController, updateTamanhoController, deleteTamanhoController } from '../controllers/tamanho.controller';
 
 const router = Router();
 // TODO: Adicionar middleware de autorização para garantir que apenas Admins ou Voluntários possam criar
@@ -66,12 +66,17 @@ const router = Router();
 */
 router.get('/', getAllTamanhosController); // O filtro é feito pelo controller
 
+router.get('/:id', getTamanhoByIdController);
 
+router.post('/', validate(createTamanhoSchema), createTamanhoController);
+
+router.put('/:id', validate(createTamanhoSchema), updateTamanhoController);
+
+router.delete('/:id', deleteTamanhoController);
 /**
  * @route POST /tamanhos
  * @description Cadastra um novo tamanho.
  * @access Voluntários/Admins
  */
-router.post('/', validate(createTamanhoSchema), createTamanhoController);
 
 export default router;

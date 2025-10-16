@@ -208,7 +208,33 @@ router.post('/', validate(createCondicaoSchema), createCondicaoController);
  *         content:
  *           application/json:
  *             schema:
- *              $ref: '#/components/schemas/Condicao'
+ *               $ref: '#/components/schemas/Condicao'
+ *       '400':
+ *         description: "Requisição inválida. O corpo da requisição não atende aos critérios de validação."
+ *         content:
+ *           application/json:
+ *             examples:
+ *               DescricaoAusente:
+ *                 summary: "Erro quando a descrição não é enviada"
+ *                 value:
+ *                   "Erro de Validação":
+ *                     - code: "invalid_type"
+ *                       expected: "string"
+ *                       received: "undefined"
+ *                       path:
+ *                         - "descricao"
+ *                       message: "A descrição é obrigatória."
+ *               DescricaoMuitoCurta:
+ *                 summary: "Erro quando a descrição é muito curta"
+ *                 value:
+ *                   "Erro de Validação":
+ *                     - code: "too_small"
+ *                       type: "string"
+ *                       minimum: 2
+ *                       inclusive: true
+ *                       path:
+ *                         - "descricao"
+ *                       message: "A descrição deve ter no mínimo 2 caracteres."
  *       '404':
  *         description: A condição com o ID especificado não foi encontrada.
  *         content:
@@ -240,7 +266,7 @@ router.post('/', validate(createCondicaoSchema), createCondicaoController);
  *                   type: string
  *                   example: "Erro ao atualizar a condição."
  */
-router.put('/:id', updateCondicaoController);
+router.put('/:id', validate(createCondicaoSchema), updateCondicaoController);
 
 /**
  * @openapi
