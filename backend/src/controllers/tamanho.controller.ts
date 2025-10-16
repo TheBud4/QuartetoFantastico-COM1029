@@ -10,6 +10,9 @@ export const createTamanhoController = async (req: Request, res: Response) => {
     if (error.message.includes('já está cadastrado')) {
       return res.status(409).json({ message: error.message });
     }
+    if (error.message === 'Tipo não encontrado.') {
+      return res.status(400).json({ message: error.message });
+    }
     return res.status(500).json({ message: 'Erro interno do servidor.' });
   }
 };
@@ -51,6 +54,9 @@ export const updateTamanhoController = async (req: Request, res: Response) => {
     }
     if (error.message.includes('já está cadastrado')) {
       return res.status(409).json({ message: error.message });
+    }
+    if (error.message === 'Tipo não encontrado.') {
+      return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Erro ao atualizar o tamanho.' });
   }
