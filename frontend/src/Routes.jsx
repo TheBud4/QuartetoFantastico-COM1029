@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home/index";
+import BemVindo from "./pages/Login/bemvindo";  
 import Estoque from "./pages/Estoque/Estoque_M";
 import CriarItem from "./pages/Estoque/CriarItem";
 
@@ -12,7 +13,7 @@ export function AppRoutes() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<BemVindo />} />
         <Route path="/estoque" element={<Estoque />} />
         <Route path="/criarItem" element={<CriarItem />} />
 

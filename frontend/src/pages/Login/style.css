@@ -1,0 +1,57 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  background: #c2c0c0;
+}
+
+
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+img {
+  height: 100vh;
+  width: 100vw;
+}
+
+/* container do quadrado (posicionamento relativo para elementos internos) */
+.quadrado {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.quadrado h1 {
+  position: static;
+  transform: none;
+  margin: 30px 0 10px 0;
+  font-weight: bold;
+  color: #000000;
+  text-shadow: #0000005d 4px 4px 6px;
+  font-family: 'archivo black', sans-serif;
+  text-align: center;
+}
+
+.quadrado h2 {
+  position: static;
+  font-size: 49px;
+  transform: none;
+  margin: 30px 0 10px 0;
+  font-weight: bold;
+  color: #ffe500;
+  text-shadow: #0000005d 4px 4px 6px;
+  font-family: 'averia gruesa libre', sans-serif;
+  text-align: center;
+}
+
+
+
+
