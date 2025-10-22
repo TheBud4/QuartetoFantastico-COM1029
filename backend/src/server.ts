@@ -8,6 +8,8 @@ import doacaoRoutes from './routes/doacao.routes';
 import tipoRoutes from './routes/tipo.routes';
 import tamanhoRoutes from './routes/tamanho.routes';
 import condicaoRoutes from './routes/condicao.routes';
+//rotas de beneficiarios
+import beneficiarioRoutes from './routes/beneficiario.routes';
 
 const app = express();
 app.use(express.json());
@@ -30,6 +32,9 @@ app.use('/doacoes', doacaoRoutes);
 app.use('/tipos', tipoRoutes);
 app.use('/tamanhos', tamanhoRoutes);
 app.use('/condicoes', condicaoRoutes);
+
+//rotas de beneficiarios
+app.use('/beneficiarios', beneficiarioRoutes);
 
 startServer(app);
 
