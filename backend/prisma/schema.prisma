@@ -32,7 +32,7 @@ model CartaoBeneficiario {
   dataValidade    DateTime
   ativo           Boolean  @default(false)
   codigoSeguranca String
-  beneficiarioId  Int
+  beneficiarioId  Int      @unique
   createdAt       DateTime @default(now()) @map("dataCriacao")
   updatedAt       DateTime @updatedAt @map("dataAtualizacao")
 

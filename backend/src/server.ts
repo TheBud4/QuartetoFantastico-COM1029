@@ -10,6 +10,7 @@ import tamanhoRoutes from './routes/tamanho.routes';
 import condicaoRoutes from './routes/condicao.routes';
 //rotas de beneficiarios
 import beneficiarioRoutes from './routes/beneficiario.routes';
+import cartaoRoutes from './routes/cartao.routes';
 
 const app = express();
 app.use(express.json());
@@ -21,7 +22,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send({
     "Hello": "World"
   });
-
 });
 
 
@@ -35,6 +35,7 @@ app.use('/condicoes', condicaoRoutes);
 
 //rotas de beneficiarios
 app.use('/beneficiarios', beneficiarioRoutes);
+app.use('/cartoes', cartaoRoutes);
 
 startServer(app);
 
