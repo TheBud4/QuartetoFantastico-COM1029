@@ -15,7 +15,7 @@ export const loginController = async (req: Request, res: Response) => {
     } catch (error: any) {
         // Se o serviço lançar o erro "Credenciais inválidas."
         if (error.message.includes('Credenciais inválidas')) {
-            return res.status(401).json({ message: error.message }); // 401 Unauthorized
+            return res.status(401).json({ message: error.message });
         }
 
         // Outros erros (ex: JWT_SECRET não definido)
