@@ -1,11 +1,12 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { prisma } from '../config/prisma';
 import { loginSchema } from '../validators/auth.validator';
 import { z } from 'zod';
+import env from '../config/env';
 
 // Extrai o tipo de dado de entrada a partir do schema do Zod
-type LoginInput = z.infer<typeof loginSchema>['body'];
+type LoginInput = z.infer<typeof loginSchema>;
 
 export const loginService = async (input: LoginInput) => {
     const { email, senha } = input;
@@ -30,10 +31,8 @@ export const loginService = async (input: LoginInput) => {
     }
 
     // 5. Gerar o token JWT
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
-        throw new Error('Segredo JWT не está configurado.');
-    }
+    const secret = env.JWT_SECRET;
+    const expiresIn: SignOptions['expiresIn'] = env.JWT_EXPIRES_IN as SignOptions['expiresIn'];
 
     const token = jwt.sign(
         {
@@ -42,7 +41,7 @@ export const loginService = async (input: LoginInput) => {
             admin: voluntario.admin, // Incluímos o perfil no token
         },
         secret,
-        { expiresIn: '8h' } // Define o tempo de expiração do token (ex: 8 horas)
+        { expiresIn }, // Define o tempo de expiração do token (ex: 8 horas)
     );
 
     // 6. Retornar o token e os dados do usuário (sem a senha)
