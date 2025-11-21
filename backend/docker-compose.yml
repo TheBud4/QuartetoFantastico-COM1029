@@ -30,7 +30,7 @@ services:
       - db
     # Comente as linhas abaixo em produção
     volumes:
-      - .:/usr/src/app
+      - .:/usr/src/app:z
       - /usr/src/app/node_modules
     command: npm run dev
     # Fim do bloco de desenvolvimento
