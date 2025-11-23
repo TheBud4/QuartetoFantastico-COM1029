@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/prisma';
 
-// Interface para o payload do JWT que definimos no service
+// Interface para o payload do JWT
 interface JwtPayload {
     id: number;
     email: string;
@@ -42,4 +42,12 @@ export const checkAuth = async (req: Request, res: Response, next: NextFunction)
     } catch (error) {
         return res.status(401).json({ message: 'Token inválido ou expirado.' });
     }
+};
+
+export const isAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user?.admin) {
+        return res.status(403).json({ message: 'Acesso negado. Requer perfil de Administrador.' });
+    }
+
+    return next();
 };

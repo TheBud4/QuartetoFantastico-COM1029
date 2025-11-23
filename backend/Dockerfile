@@ -25,6 +25,8 @@ RUN npm install --omit=dev
 # Copia o schema e o cliente Prisma gerado no estágio de build
 COPY --from=builder /usr/src/app/prisma ./prisma
 COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /usr/src/app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /usr/src/app/docs ./docs
 
 # Copia a aplicação já compilada
 COPY --from=builder /usr/src/app/dist ./dist
