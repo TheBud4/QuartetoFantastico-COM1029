@@ -12,6 +12,22 @@ servers:
         default: "3000"
         description: Porta configurada da aplicação
 
+tags:
+  - name: Autenticação
+    description: Login e emissão de tokens JWT
+  - name: Voluntários
+    description: Gestão de voluntários do sistema
+  - name: Tipos
+    description: Gestão de tipos de itens
+  - name: Tamanhos
+    description: Gestão de tamanhos vinculados a tipos
+  - name: Condições
+    description: Gestão das condições de conservação
+  - name: Beneficiários
+    description: Gestão de beneficiários
+  - name: Doações
+    description: Registro e consulta de doações
+
 paths:
   /:
     get:
@@ -73,6 +89,212 @@ paths:
                 $ref: '#/components/schemas/ValidationErrorResponse'
         '401':
           description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /voluntarios:
+    get:
+      tags: [Voluntários]
+      summary: Lista voluntários (requer token)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de voluntários sem senha
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Voluntario'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+    post:
+      tags: [Voluntários]
+      summary: Cria um voluntário (apenas admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoluntarioInput'
+      responses:
+        '201':
+          description: Voluntário criado (sem senha)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voluntario'
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '403':
+          description: Não autorizado (não admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '409':
+          description: Email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /voluntarios/{id}:
+    get:
+      tags: [Voluntários]
+      summary: Busca voluntário por ID (requer token)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Voluntário encontrado (sem senha)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voluntario'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+    put:
+      tags: [Voluntários]
+      summary: Atualiza voluntário (apenas admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VoluntarioUpdate'
+      responses:
+        '200':
+          description: Voluntário atualizado (sem senha)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voluntario'
+        '400':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '403':
+          description: Não autorizado (não admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+    delete:
+      tags: [Voluntários]
+      summary: Remove voluntário (apenas admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Removido com sucesso
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '403':
+          description: Não autorizado (não admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Não encontrado
           content:
             application/json:
               schema:
@@ -940,6 +1162,51 @@ components:
         updatedAt:
           type: string
           format: date-time
+    VoluntarioInput:
+      type: object
+      required: [nome, email, senha]
+      properties:
+        nome:
+          type: string
+          example: Ana Souza
+        email:
+          type: string
+          format: email
+          example: ana@sanem.com
+        senha:
+          type: string
+          format: password
+          example: senha123
+        admin:
+          type: boolean
+          example: false
+        endereco:
+          type: string
+          nullable: true
+          example: Rua das Flores, 123
+        telefone:
+          type: string
+          nullable: true
+          example: 11999998888
+    VoluntarioUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        senha:
+          type: string
+          format: password
+        admin:
+          type: boolean
+        endereco:
+          type: string
+          nullable: true
+        telefone:
+          type: string
+          nullable: true
     Tipo:
       type: object
       properties:

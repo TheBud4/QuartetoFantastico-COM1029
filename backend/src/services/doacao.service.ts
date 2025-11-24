@@ -1,18 +1,5 @@
 import { prisma } from '../config/prisma';
-
-// Interface para cada item na lista da requisição
-interface ItemInput {
-  tipoId: number;
-  tamanhoId: number;
-  condicaoId: number;
-  quantidade: number;
-}
-
-// Interface para o corpo completo da requisição
-interface CreateDoacaoInput {
-  voluntarioId: number;
-  itens: ItemInput[];
-}
+import { CreateDoacaoInput } from '../validators/doacao.validator';
 
 export const createDoacaoService = async (input: CreateDoacaoInput) => {
   const { voluntarioId, itens } = input;
