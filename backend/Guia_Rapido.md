@@ -63,6 +63,11 @@ Estes são os passos para configurar o ambiente pela primeira vez após clonar o
 
 Pronto\! O seu ambiente de desenvolvimento está 100% operacional. A aplicação está acessível em `http://localhost:3000`.
 
+### Documentação da API
+
+- UI interativa: `http://localhost:3000/apidocs`
+- YAML cru: `http://localhost:3000/apidocs.yaml`
+
 -----
 
 ## 日常 Fluxo de Desenvolvimento do Dia a Dia
@@ -159,3 +164,11 @@ Todos os comandos do Prisma devem ser executados dentro do container `app` usand
     ```bash
     docker-compose exec app npx prisma migrate status
     ```
+
+  * **Rodar o seed de dados (usa `prisma/seed.ts`):**
+
+    ```bash
+    docker compose exec app npx tsx prisma/seed.ts
+    ```
+
+    > Garanta que `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` estão definidos no `.env` antes de rodar.
