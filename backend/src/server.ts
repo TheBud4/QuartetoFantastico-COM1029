@@ -16,6 +16,10 @@ import condicaoRoutes from './routes/condicao.routes';
 //rotas de beneficiarios
 import beneficiarioRoutes from './routes/beneficiario.routes';
 
+//rotas de voluntarios
+import voluntarioRoutes from './routes/voluntario.routes';
+
+
 const app = express();
 app.use(express.json());
 
@@ -38,6 +42,9 @@ app.use('/condicoes', condicaoRoutes);
 
 //rotas de beneficiarios
 app.use('/beneficiarios', beneficiarioRoutes);
+
+//rotas de voluntarios
+app.use('/voluntarios', voluntarioRoutes);
 
 // Rota de autenticação
 app.use('/auth', authRoutes);
