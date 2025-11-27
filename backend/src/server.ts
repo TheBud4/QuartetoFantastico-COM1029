@@ -15,6 +15,7 @@ import condicaoRoutes from './routes/condicao.routes';
 
 //rotas de beneficiarios
 import beneficiarioRoutes from './routes/beneficiario.routes';
+import cartaoRoutes from './routes/cartao.routes';
 
 //rotas de voluntarios
 import voluntarioRoutes from './routes/voluntario.routes';
@@ -29,7 +30,6 @@ app.get("/", (req: Request, res: Response) => {
   res.send({
     "Hello": "World"
   });
-
 });
 
 // Rotas de doação
@@ -42,6 +42,7 @@ app.use('/condicoes', condicaoRoutes);
 
 //rotas de beneficiarios
 app.use('/beneficiarios', beneficiarioRoutes);
+app.use('/cartoes', cartaoRoutes);
 
 //rotas de voluntarios
 app.use('/voluntarios', voluntarioRoutes);
