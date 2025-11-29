@@ -26,52 +26,52 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
     });
 
     // Mapeia para facilitar a consulta
-    const estoqueMap = new Map(itensNoBanco.map(item => [item.id, item.quantidade]));
+    const estoqueMap = new Map(itensNoBanco.map(item => [item.id, item.quantidadeEstoque]));
 
     for (const item of itens) {
         const estoqueDisponivel = estoqueMap.get(item.itemId);
-        
+
         if (estoqueDisponivel === undefined) {
-        throw new Error(`Item com ID ${item.itemId} não encontrado no estoque.`);
+            throw new Error(`Item com ID ${item.itemId} não encontrado no estoque.`);
         }
         if (estoqueDisponivel < item.quantidade) {
-        throw new Error(`Estoque insuficiente para o item ID ${item.itemId}. Disponível: ${estoqueDisponivel}, Solicitado: ${item.quantidade}.`);
+            throw new Error(`Estoque insuficiente para o item ID ${item.itemId}. Disponível: ${estoqueDisponivel}, Solicitado: ${item.quantidade}.`);
         }
     }
 
     // --- 2. Início da Transação ---
     // Se todas as verificações passarem, executa a transação.
-    
+
     return prisma.$transaction(async (tx) => {
         // a. Criar o registro principal da Distribuição
         const distribuicao = await tx.distribuicao.create({
-        data: {
-            voluntarioId,
-            beneficiarioId,
-        },
+            data: {
+                voluntarioId,
+                beneficiarioId,
+            },
         });
 
         // b. Criar os registros em ItemDistribuicao (o "recibo")
         await tx.itemDistribuicao.createMany({
-        data: itens.map(item => ({
-            distribuicaoId: distribuicao.id,
-            itemId: item.itemId,
-            quantidade: item.quantidade,
-        })),
+            data: itens.map(item => ({
+                distribuicaoId: distribuicao.id,
+                itemId: item.itemId,
+                quantidade: item.quantidade,
+            })),
         });
 
         // c. Atualizar (dar baixa) no estoque na tabela Item
-        const operacoesDeBaixa = itens.map(item => 
-        tx.item.update({
-            where: { id: item.itemId },
-            data: {
-            quantidade: {
-                decrement: item.quantidade,
-            },
-            },
-        })
+        const operacoesDeBaixa = itens.map(item =>
+            tx.item.update({
+                where: { id: item.itemId },
+                data: {
+                    quantidadeEstoque: {
+                        decrement: item.quantidade,
+                    },
+                },
+            })
         );
-        
+
         await Promise.all(operacoesDeBaixa);
 
         return distribuicao; // Retorna a distribuição criada
@@ -83,28 +83,28 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
  */
 export const getAllDistribuicoesService = async () => {
     return prisma.distribuicao.findMany({
-        orderBy: { dataCriacao: 'desc' },
+        orderBy: { createdAt: 'desc' },
         include: {
-        voluntario: {
-            select: { nome: true },
-        },
-        beneficiario: {
-            select: { nome: true },
-        },
-        // Pega os itens da distribuição e seus detalhes
-        ItemDistribuicao: {
-            select: {
-            quantidade: true,
-            item: {
+            voluntario: {
+                select: { nome: true },
+            },
+            beneficiario: {
+                select: { nome: true },
+            },
+            // Pega os itens da distribuição e seus detalhes
+            itens: {
                 select: {
-                id: true,
-                tipo: { select: { descricao: true } },     // ex: "Camisa"
-                tamanho: { select: { descricao: true } }, // ex: "M"
-                condicao: { select: { descricao: true } } // ex: "Novo"
+                    quantidade: true,
+                    item: {
+                        select: {
+                            id: true,
+                            tipo: { select: { descricao: true } },     // ex: "Camisa"
+                            tamanho: { select: { descricao: true } }, // ex: "M"
+                            condicao: { select: { descricao: true } } // ex: "Novo"
+                        }
+                    }
                 }
             }
-            }
-        }
         }
     });
 };
@@ -116,21 +116,21 @@ export const getDistribuicaoByIdService = async (id: number) => {
     const distribuicao = await prisma.distribuicao.findUnique({
         where: { id },
         include: {
-        voluntario: { select: { nome: true } },
-        beneficiario: { select: { nome: true } },
-        ItemDistribuicao: {
-            select: {
-            quantidade: true,
-            item: {
+            voluntario: { select: { nome: true } },
+            beneficiario: { select: { nome: true } },
+            itens: {
                 select: {
-                id: true,
-                tipo: { select: { descricao: true } },
-                tamanho: { select: { descricao: true } },
-                condicao: { select: { descricao: true } }
+                    quantidade: true,
+                    item: {
+                        select: {
+                            id: true,
+                            tipo: { select: { descricao: true } },
+                            tamanho: { select: { descricao: true } },
+                            condicao: { select: { descricao: true } }
+                        }
+                    }
                 }
             }
-            }
-        }
         }
     });
 
