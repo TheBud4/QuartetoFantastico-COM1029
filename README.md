@@ -25,30 +25,68 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 
 ## 🚀 Tecnologias
 
--Front end
-React
--Back end:
-(em desenvolvimento)
+**Frontend**
+- React + Vite
+- CSS Modules
+
+**Backend**
+- Node.js + Express (TypeScript)
+- Prisma ORM (PostgreSQL) com driver adapter `@prisma/adapter-pg`
+- Autenticação JWT (`jsonwebtoken`)
+- Validação com Zod
+- Documentação OpenAPI/Swagger (`swagger-jsdoc` + `swagger-ui-express`)
+
+**Infra**
+- Docker e Docker Compose
+- Scripts de migração/seed via Prisma
 
 ---
 
 ## ⚙️ Instalação
 
-(em breve)
+1. Instale as dependências:
+
+   ```bash
+   npm install
+   ```
+
+2. Configure o `.env` (backend e frontend, se necessário) com as variáveis de banco, JWT e seed.
+
+3. Suba os serviços com Docker:
+
+   ```bash
+   docker compose up --build
+   ```
 
 ---
 
 ## 🧪 Como usar
 
-(em breve)
+1. Acesse o backend em `http://localhost:3000`.
+2. Documentação da API: `http://localhost:3000/apidocs` (UI) ou `http://localhost:3000/apidocs.yaml` (YAML).
+3. Rodar migrações manualmente (se necessário):
+
+   ```bash
+   docker compose exec app npx prisma migrate deploy
+   ```
+
+4. Rodar o seed:
+
+   ```bash
+   docker compose exec app npx tsx prisma/seed.ts
+   ```
+
+   > Exige `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` definidos no `.env`.
 
 ---
 
 ## 📄 Documentação
 
-[Documentação](https://docs.google.com/document/d/1Wcm7rU8M-KzOWyroloNW2MCT5hMKPz27V5oUWZ41BAA/edit?tab=t.0#heading=h.t5lws1x1u33z)
-[Prototipação](em breve).
-[Trello](em breve).
+- Swagger UI: `http://localhost:3000/apidocs`
+- OpenAPI YAML: `http://localhost:3000/apidocs.yaml`
+- Documento de visão: [Google Docs](https://docs.google.com/document/d/1Wcm7rU8M-KzOWyroloNW2MCT5hMKPz27V5oUWZ41BAA/edit?tab=t.0#heading=h.t5lws1x1u33z)
+- Prototipação: (em breve)
+- Board/Trello: (em breve)
 
 ---
 
