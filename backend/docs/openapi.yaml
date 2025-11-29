@@ -1044,9 +1044,7 @@ paths:
                   - $ref: '#/components/schemas/ValidationErrorResponse'
                   - $ref: '#/components/schemas/MessageResponse'
         '404':
-          description: Voluntário não encontrado
-        '404':
-          description: Algum item referenciado não existe
+          description: Voluntário não encontrado ou algum item referenciado não existe
           content:
             application/json:
               schema:
