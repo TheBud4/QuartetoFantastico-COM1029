@@ -2,19 +2,21 @@ import { z } from 'zod';
 
 // Schema para criação e atualização de Beneficiário
 export const beneficiarioSchema = z.object({
-    nome: z.string('O nome é obrigatório.')
-        .min(3, 'O nome deve ter no mínimo 3 caracteres.'),
+    nome: z.string({ error: issue => issue.input === undefined ? 'O nome é obrigatório.' : 'O nome deve ser um texto.' })
+        .min(3, { message: 'O nome deve ter no mínimo 3 caracteres.' }),
 
-    cpf: z.string('O CPF é obrigatório.')
-        .regex(/^\d{11}$/, 'O CPF deve conter exatamente 11 dígitos numéricos.'),
+    cpf: z.string({ error: issue => issue.input === undefined ? 'O CPF é obrigatório.' : 'O CPF deve ser um texto.' })
+        .transform((val) => val.replace(/\D/g, ''))
+        .refine((val) => /^\d{11}$/.test(val), { message: 'O CPF deve conter exatamente 11 dígitos numéricos.' }),
 
-    telefone: z.string()
-        .regex(/^\d{10,11}$/, 'O Telefone deve conter 10 ou 11 dígitos numéricos (DDD + número).')
+    telefone: z.string({ error: 'O telefone deve ser um texto.' })
+        .transform((val) => val.replace(/\D/g, ''))
+        .refine((val) => val.length === 0 || (val.length >= 8 && val.length <= 15), { message: 'O telefone deve conter entre 8 e 15 dígitos numéricos.' })
         .optional()
         .nullable(),
 
-    endereco: z.string()
-        .min(5, 'O endereço deve ter no mínimo 5 caracteres.')
+    endereco: z.string({ error: 'O endereço deve ser um texto.' })
+        .min(5, { message: 'O endereço deve ter no mínimo 5 caracteres.' })
         .optional()
         .nullable(),
 });

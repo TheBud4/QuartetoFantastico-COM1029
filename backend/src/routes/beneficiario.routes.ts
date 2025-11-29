@@ -8,13 +8,13 @@ import {
     updateBeneficiarioController,
     deleteBeneficiarioController
 } from '../controllers/beneficiario.controller';
+import { checkAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', getAllBeneficiariosController);
-router.get('/:id', getBeneficiarioByIdController);
-router.post('/', validate(beneficiarioSchema), createBeneficiarioController);
-router.put('/:id', validate(beneficiarioSchema), updateBeneficiarioController);
-router.delete('/:id', deleteBeneficiarioController);
-
+router.get('/', checkAuth, getAllBeneficiariosController);
+router.get('/:id', checkAuth, getBeneficiarioByIdController);
+router.post('/', checkAuth, validate(beneficiarioSchema), createBeneficiarioController);
+router.put('/:id', checkAuth, validate(beneficiarioSchema), updateBeneficiarioController);
+router.delete('/:id', checkAuth, deleteBeneficiarioController);
 export default router;

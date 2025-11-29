@@ -12,17 +12,13 @@ import {
 
 const router = Router();
 
-// ROTA PÚBLICA (Opcional: Talvez você queira listar voluntários publicamente? Se não, proteja também)
-// Vamos assumir que só quem está logado pode ver a lista
 router.get('/', checkAuth, getAllVoluntariosController);
 router.get('/:id', checkAuth, getVoluntarioByIdController);
 
-// ROTAS RESTRITAS A ADMINISTRADORES
-// Apenas Admin pode CRIAR, EDITAR ou DELETAR usuários
 router.post(
     '/',
-    checkAuth, // 1. Verifica o token
-    isAdmin,   // 2. Verifica se admin = true
+    checkAuth,
+    isAdmin,
     validate(createVoluntarioSchema),
     createVoluntarioController
 );

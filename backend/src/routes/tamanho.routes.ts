@@ -8,13 +8,13 @@ import {
   updateTamanhoController,
   deleteTamanhoController,
 } from '../controllers/tamanho.controller';
+import { checkAuth } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-router.get('/', getAllTamanhosController);
-router.get('/:id', getTamanhoByIdController);
-router.post('/', validate(createTamanhoSchema), createTamanhoController);
-router.put('/:id', validate(createTamanhoSchema), updateTamanhoController);
-router.delete('/:id', deleteTamanhoController);
-
+router.get('/', checkAuth, getAllTamanhosController);
+router.get('/:id', checkAuth, getTamanhoByIdController);
+router.post('/', checkAuth, validate(createTamanhoSchema), createTamanhoController);
+router.put('/:id', checkAuth, validate(createTamanhoSchema), updateTamanhoController);
+router.delete('/:id', checkAuth, deleteTamanhoController);
 export default router;
