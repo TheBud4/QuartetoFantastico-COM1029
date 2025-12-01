@@ -11,6 +11,8 @@ servers:
       port:
         default: "3000"
         description: Porta configurada da aplicação
+security:
+  - bearerAuth: []
 
 tags:
   - name: Autenticação
@@ -38,6 +40,7 @@ paths:
       summary: Healthcheck simples
       description: |
         Retorna um objeto com "Hello": "World" para indicar que a API está de pé.
+      security: []
       responses:
         '200':
           description: API disponível
@@ -54,6 +57,7 @@ paths:
     post:
       tags: [Autenticação]
       summary: Autentica um usuário e retorna um token JWT
+      security: []
       requestBody:
         required: true
         content:
@@ -311,6 +315,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /tipos:
+    security:
+      - bearerAuth: []
     get:
       tags: [Tipos]
       summary: Lista todos os tipos de itens
@@ -370,6 +376,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /tipos/{id}:
+    security:
+      - bearerAuth: []
     get:
       tags: [Tipos]
       summary: Busca um tipo por ID
@@ -481,6 +489,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /tamanhos:
+    security:
+      - bearerAuth: []
     get:
       tags: [Tamanhos]
       summary: Lista todos os tamanhos
@@ -551,6 +561,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /tamanhos/{id}:
+    security:
+      - bearerAuth: []
     get:
       tags: [Tamanhos]
       summary: Busca um tamanho por ID
@@ -667,6 +679,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /condicoes:
+    security:
+      - bearerAuth: []
     get:
       tags: [Condições]
       summary: Lista todas as condições
@@ -726,6 +740,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /condicoes/{id}:
+    security:
+      - bearerAuth: []
     get:
       tags: [Condições]
       summary: Busca uma condição por ID
@@ -837,6 +853,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /beneficiarios:
+    security:
+      - bearerAuth: []
     get:
       tags: [Beneficiários]
       summary: Lista todos os beneficiários
@@ -891,6 +909,8 @@ paths:
                 $ref: '#/components/schemas/MessageResponse'
 
   /beneficiarios/{id}:
+    security:
+      - bearerAuth: []
     get:
       tags: [Beneficiários]
       summary: Busca um beneficiário por ID

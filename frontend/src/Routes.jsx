@@ -1,25 +1,29 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  Route,
+  BrowserRouter as Router,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 
-import Home from "./pages/Home/index";
-import Estoque from "./pages/Estoque/Estoque_M";
-import CriarItem from "./pages/Estoque/CriarItem";
-
-// 🆕 Importações para doações
-import Doacoes from "./pages/Doacao/Doacoes";
-import CriarDoacao from "./pages/Doacao/CriarDoacao";
+import Home from "./pages/Home/home";
+import BemVindo from "./pages/BemVindo/bemVindo";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./context/ProtectedRoute";
 
 export function AppRoutes() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/estoque" element={<Estoque />} />
-        <Route path="/criarItem" element={<CriarItem />} />
+      <AuthProvider>
+        <Routes>
+          <Route path="/" element={<BemVindo />} />
 
-        {/* 🆕 Rotas de doações */}
-        <Route path="/doacao" element={<Doacoes />} />
-        <Route path="/criarDoacao" element={<CriarDoacao />} />
-      </Routes>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/home" element={<Home />} />
+          </Route>
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

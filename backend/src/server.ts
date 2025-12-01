@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import startServer from "./scripts/startServer";
 import { setupSwagger } from "./config/swagger";
-
+import cors from "cors";
 // Rota de autenticação
 import authRoutes from './routes/auth.routes';
 
@@ -20,9 +20,13 @@ import cartaoRoutes from './routes/cartao.routes';
 //rotas de voluntarios
 import voluntarioRoutes from './routes/voluntario.routes';
 
+const corsOptions = {
+  origin: '*',
+  optionsSuccessStatus: 204,
+};
 
 const app = express();
-app.use(express.json());
+app.use(express.json(), cors(corsOptions));
 
 setupSwagger(app);
 
@@ -51,4 +55,3 @@ app.use('/voluntarios', voluntarioRoutes);
 app.use('/auth', authRoutes);
 
 startServer(app);
-
