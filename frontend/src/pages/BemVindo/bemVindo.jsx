@@ -78,17 +78,6 @@ function BemVindo() {
             <button type="submit" className="btn-submit">
               Entrar
             </button>
-            <div className="esqueceu-senha">
-              <button
-                type="button"
-                className="link-forgot basetext-inter"
-                onClick={() =>
-                  addToast("Funcionalidade de recuperação em breve.", "info")
-                }
-              >
-                Esqueceu sua senha?
-              </button>
-            </div>
           </form>
         </div>
       </div>

@@ -12,6 +12,7 @@ import doacaoRoutes from './routes/doacao.routes';
 import tipoRoutes from './routes/tipo.routes';
 import tamanhoRoutes from './routes/tamanho.routes';
 import condicaoRoutes from './routes/condicao.routes';
+import itemRoutes from './routes/item.routes';
 
 //rotas de beneficiarios
 import beneficiarioRoutes from './routes/beneficiario.routes';
@@ -19,6 +20,7 @@ import cartaoRoutes from './routes/cartao.routes';
 
 //rotas de voluntarios
 import voluntarioRoutes from './routes/voluntario.routes';
+import distribuicaoRoutes from "./routes/distribuicao.routes";
 
 const corsOptions = {
   origin: '*',
@@ -39,10 +41,15 @@ app.get("/", (req: Request, res: Response) => {
 // Rotas de doação
 app.use('/doacoes', doacaoRoutes);
 
-// Rotas de tipo, tamanho e condição
-app.use('/tipos', tipoRoutes);
-app.use('/tamanhos', tamanhoRoutes);
-app.use('/condicoes', condicaoRoutes);
+// Rotas de distrubuicao
+
+app.use('/distribuicoes', distribuicaoRoutes);
+
+// Rotas de item
+app.use('/itens', itemRoutes);
+app.use('/item/tipos', tipoRoutes);
+app.use('/item/tamanhos', tamanhoRoutes);
+app.use('/item/condicoes', condicaoRoutes);
 
 //rotas de beneficiarios
 app.use('/beneficiarios', beneficiarioRoutes);

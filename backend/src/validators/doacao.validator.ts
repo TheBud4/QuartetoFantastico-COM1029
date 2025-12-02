@@ -14,10 +14,8 @@ export const itemDoacaoSchema = z.object({
 
 // Schema principal para o corpo da requisição de criação de doação
 export const createDoacaoSchema = z.object({
-    voluntarioId: z.number({ error: issue => issue.input === undefined ? 'O ID do voluntário é obrigatório.' : 'O ID do voluntário deve ser numérico.' })
-      .int({ message: 'O ID do voluntário deve ser um número inteiro.' }),
     itens: z.array(itemDoacaoSchema).min(1, 'A doação deve conter pelo menos um item.'),
 });
 
 export type ItemDoacaoInput = z.infer<typeof itemDoacaoSchema>;
-export type CreateDoacaoInput = z.infer<typeof createDoacaoSchema>;
+export type CreateDoacaoBody = z.infer<typeof createDoacaoSchema>;

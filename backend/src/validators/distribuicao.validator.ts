@@ -2,9 +2,12 @@ import { z } from 'zod';
 
 // Schema para um item individual dentro da distribuição
 const itemDistribuicaoSchema = z.object({
-    itemId: z.number({ error: issue => issue.input === undefined ? 'O ID do item é obrigatório.' : 'O ID do item deve ser numérico.' })
-        .int({ message: 'O ID do item deve ser um inteiro.' })
-        .positive('O ID do item é inválido.'),
+    tipoId: z.number({ error: issue => issue.input === undefined ? 'O tipo do item é obrigatório.' : 'O tipo do item deve ser numérico.' })
+        .int({ message: 'O tipo do item deve ser um inteiro.' }),
+    tamanhoId: z.number({ error: issue => issue.input === undefined ? 'O tamanho do item é obrigatório.' : 'O tamanho do item deve ser numérico.' })
+        .int({ message: 'O tamanho do item deve ser um inteiro.' }),
+    condicaoId: z.number({ error: issue => issue.input === undefined ? 'A condição do item é obrigatória.' : 'A condição do item deve ser numérica.' })
+        .int({ message: 'A condição do item deve ser um inteiro.' }),
     quantidade: z.number({ error: issue => issue.input === undefined ? 'A quantidade é obrigatória.' : 'A quantidade deve ser numérica.' })
         .int({ message: 'A quantidade deve ser um inteiro.' })
         .positive('A quantidade deve ser de pelo menos 1.'),
@@ -12,9 +15,6 @@ const itemDistribuicaoSchema = z.object({
 
 // Schema principal para criar uma nova distribuição
 export const createDistribuicaoSchema = z.object({
-    voluntarioId: z.number({ error: issue => issue.input === undefined ? 'O ID do voluntário é obrigatório.' : 'O ID do voluntário deve ser numérico.' })
-        .int({ message: 'O ID do voluntário deve ser um inteiro.' }),
-
     beneficiarioId: z.number({ error: issue => issue.input === undefined ? 'O ID do beneficiário é obrigatório.' : 'O ID do beneficiário deve ser numérico.' })
         .int({ message: 'O ID do beneficiário deve ser um inteiro.' }),
 

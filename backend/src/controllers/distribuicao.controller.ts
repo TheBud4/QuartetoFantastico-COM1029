@@ -7,8 +7,11 @@ import {
 
 export const createDistribuicaoController = async (req: Request, res: Response) => {
     try {
+        if (!req.user?.id) {
+            return res.status(401).json({ message: 'Usuário não autenticado.' });
+        }
         const data = req.body;
-        const novaDistribuicao = await createDistribuicaoService(data);
+        const novaDistribuicao = await createDistribuicaoService(data, req.user.id);
         return res.status(201).json(novaDistribuicao);
     } catch (error: any) {
         // Erros de negócio (falta de estoque, item não encontrado)
@@ -33,7 +36,11 @@ export const getAllDistribuicoesController = async (req: Request, res: Response)
 export const getDistribuicaoByIdController = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
-        const distribuicao = await getDistribuicaoByIdService(Number(id));
+        const parsedId = Number(id);
+        if (Number.isNaN(parsedId)) {
+            return res.status(400).json({ message: 'ID inválido.' });
+        }
+        const distribuicao = await getDistribuicaoByIdService(parsedId);
         return res.status(200).json(distribuicao);
     } catch (error: any) {
         if (error.message.includes('não encontrada')) {

@@ -5,8 +5,8 @@ import { CreateDistribuicaoSchemaType } from '../validators/distribuicao.validat
  * Cria uma nova distribuição, registrando os itens e dando baixa no estoque.
  * Este processo é transacional.
  */
-export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaType) => {
-    const { voluntarioId, beneficiarioId, itens } = data;
+export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaType, voluntarioId: number) => {
+    const { beneficiarioId, itens } = data;
 
     // --- 1. Verificações Prévias (Fora da Transação) ---
 
@@ -19,23 +19,33 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
     if (!voluntario) throw new Error('Voluntário não encontrado.');
     if (!beneficiario) throw new Error('Beneficiário não encontrado.');
 
-    // Verificar estoque para TODOS os itens da lista
-    const itemIds = itens.map(item => item.itemId);
+    // Verificar estoque para TODOS os itens da lista, buscando pelo composto (tipo/tamanho/condição)
     const itensNoBanco = await prisma.item.findMany({
-        where: { id: { in: itemIds } },
+        where: {
+            OR: itens.map((i) => ({
+                tipoId: i.tipoId,
+                tamanhoId: i.tamanhoId,
+                condicaoId: i.condicaoId,
+            })),
+        },
     });
 
-    // Mapeia para facilitar a consulta
-    const estoqueMap = new Map(itensNoBanco.map(item => [item.id, item.quantidadeEstoque]));
+    const estoqueMap = new Map(
+        itensNoBanco.map(item => [
+            `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`,
+            { id: item.id, quantidade: item.quantidadeEstoque }
+        ])
+    );
 
     for (const item of itens) {
-        const estoqueDisponivel = estoqueMap.get(item.itemId);
+        const key = `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`;
+        const registro = estoqueMap.get(key);
 
-        if (estoqueDisponivel === undefined) {
-            throw new Error(`Item com ID ${item.itemId} não encontrado no estoque.`);
+        if (!registro) {
+            throw new Error(`Item (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}) não encontrado no estoque.`);
         }
-        if (estoqueDisponivel < item.quantidade) {
-            throw new Error(`Estoque insuficiente para o item ID ${item.itemId}. Disponível: ${estoqueDisponivel}, Solicitado: ${item.quantidade}.`);
+        if (registro.quantidade < item.quantidade) {
+            throw new Error(`Estoque insuficiente para o item (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}). Disponível: ${registro.quantidade}, solicitado: ${item.quantidade}.`);
         }
     }
 
@@ -52,27 +62,33 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
         });
 
         // b. Criar os registros em ItemDistribuicao (o "recibo")
-        await tx.itemDistribuicao.createMany({
-            data: itens.map(item => ({
-                distribuicaoId: distribuicao.id,
-                itemId: item.itemId,
-                quantidade: item.quantidade,
-            })),
-        });
+        const itensDistribuidos = [];
+        for (const item of itens) {
+            const key = `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`;
+            const registro = estoqueMap.get(key);
+            if (!registro) {
+                throw new Error(`Item não encontrado para distribuição (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}).`);
+            }
 
-        // c. Atualizar (dar baixa) no estoque na tabela Item
-        const operacoesDeBaixa = itens.map(item =>
-            tx.item.update({
-                where: { id: item.itemId },
+            await tx.itemDistribuicao.create({
+                data: {
+                    distribuicaoId: distribuicao.id,
+                    itemId: registro.id,
+                    quantidade: item.quantidade,
+                },
+            });
+
+            await tx.item.update({
+                where: { id: registro.id },
                 data: {
                     quantidadeEstoque: {
                         decrement: item.quantidade,
                     },
                 },
-            })
-        );
+            });
 
-        await Promise.all(operacoesDeBaixa);
+            itensDistribuidos.push(registro.id);
+        }
 
         return distribuicao; // Retorna a distribuição criada
     });
