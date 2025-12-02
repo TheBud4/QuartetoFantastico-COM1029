@@ -35,6 +35,10 @@ tags:
     description: Gestão de cartões de beneficiários
   - name: Distribuições
     description: Saída de itens para beneficiários
+  - name: Dashboard
+    description: Indicadores consolidados para visão geral
+  - name: Relatórios
+    description: Relatórios de movimentações (entradas e saídas)
 
 paths:
   /:
@@ -932,6 +936,56 @@ paths:
         '500':
           description: Erro interno
 
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Retorna métricas consolidadas do sistema
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Métricas do dashboard
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardMetrics'
+        '401':
+          description: Não autenticado
+        '500':
+          description: Erro interno
+
+  /relatorios/movimentacoes:
+    get:
+      tags: [Relatórios]
+      summary: Gera relatório de entradas (doações) e saídas (distribuições)
+      description: Retorna um relatório consolidado; parâmetros de data são opcionais.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: inicio
+          schema:
+            type: string
+            format: date-time
+          description: Data/hora inicial (ISO)
+        - in: query
+          name: fim
+          schema:
+            type: string
+            format: date-time
+          description: Data/hora final (ISO)
+      responses:
+        '200':
+          description: Relatório de movimentações
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MovimentacoesReport'
+        '400':
+          description: Parâmetros inválidos
+        '500':
+          description: Erro interno
+
   /beneficiarios:
     security:
       - bearerAuth: []
@@ -1548,6 +1602,9 @@ components:
         endereco:
           type: string
           nullable: true
+        limiteItens:
+          type: integer
+          description: Limite máximo de itens que o beneficiário pode receber (0 = sem limite)
         createdAt:
           type: string
           format: date-time
@@ -1563,6 +1620,7 @@ components:
           example: Jose da Silva
         cpf:
           type: string
+          description: Somente números
           example: '11122233344'
         telefone:
           type: string
@@ -1572,6 +1630,9 @@ components:
           type: string
           example: 'Rua das Flores, 123'
           nullable: true
+        limiteItens:
+          type: integer
+          description: 0 para sem limite; maior que 0 para limitar
     ItemCatalog:
       type: object
       properties:
@@ -1632,6 +1693,72 @@ components:
         quantidade:
           type: integer
           minimum: 0
+    DashboardMetrics:
+      type: object
+      properties:
+        voluntarios:
+          type: integer
+        beneficiarios:
+          type: integer
+        doacoes:
+          type: integer
+        distribuicoes:
+          type: integer
+        estoqueTotal:
+          type: integer
+        itensBaixoEstoque:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              quantidadeEstoque:
+                type: integer
+              tipo:
+                type: object
+                properties:
+                  descricao:
+                    type: string
+              tamanho:
+                type: object
+                properties:
+                  descricao:
+                    type: string
+              condicao:
+                type: object
+                properties:
+                  descricao:
+                    type: string
+    MovimentacoesReport:
+      type: object
+      properties:
+        periodo:
+          type: object
+          properties:
+            inicio:
+              type: string
+              format: date-time
+              nullable: true
+            fim:
+              type: string
+              format: date-time
+              nullable: true
+        resumo:
+          type: object
+          properties:
+            totalEntradas:
+              type: number
+            totalSaidas:
+              type: number
+        doacoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Doacao'
+        distribuicoes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DistribuicaoDetalhe'
     ItemDoacao:
       type: object
       properties:

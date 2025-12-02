@@ -5,10 +5,72 @@
   color: var(--text-color);
 }
 
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
 .home-title {
   font-size: 28px;
   font-weight: 700;
   color: var(--primary-color);
+}
+
+.download-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  background: #fff;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.metric-card p {
+  margin: 0;
+  color: var(--secondary-color);
+}
+
+.metric-card h3 {
+  margin: 4px 0 0;
+  color: var(--primary-color);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.chart-card {
+  background: #fff;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  display: grid;
+  gap: 8px;
+}
+
+.chart-title {
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.chart-body {
+  min-height: 260px;
 }
 
 .home-grid {

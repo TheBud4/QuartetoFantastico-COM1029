@@ -29,8 +29,8 @@ export default function Beneficiarios() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({ nome: "", cpf: "", telefone: "", endereco: "" });
-  const [createData, setCreateData] = useState({ nome: "", cpf: "", telefone: "", endereco: "" });
+  const [editData, setEditData] = useState({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
+  const [createData, setCreateData] = useState({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
   const [submitting, setSubmitting] = useState(false);
 
   const headers = useMemo(
@@ -81,12 +81,13 @@ export default function Beneficiarios() {
       cpf: b.cpf || "",
       telefone: b.telefone || "",
       endereco: b.endereco || "",
+      limiteItens: b.limiteItens ?? 0,
     });
   };
 
   const cancelEdit = () => {
     setEditId(null);
-    setEditData({ nome: "", cpf: "", telefone: "", endereco: "" });
+    setEditData({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
   };
 
   const handleUpdate = async (id) => {
@@ -100,6 +101,11 @@ export default function Beneficiarios() {
       return;
     }
     const telefoneLimpo = editData.telefone ? editData.telefone.replace(/\D/g, "") : "";
+    const limite = Number(editData.limiteItens);
+    if (Number.isNaN(limite) || limite < 0) {
+      addToast("Limite deve ser zero (ilimitado) ou um número positivo.", "warning");
+      return;
+    }
     setSubmitting(true);
     try {
       const { data } = await api.put(
@@ -109,6 +115,7 @@ export default function Beneficiarios() {
           nome: editData.nome.trim(),
           cpf: cpfLimpo,
           telefone: telefoneLimpo || null,
+          limiteItens: limite,
         },
         { headers }
       );
@@ -147,6 +154,11 @@ export default function Beneficiarios() {
       return;
     }
     const telefoneLimpo = createData.telefone ? createData.telefone.replace(/\D/g, "") : "";
+    const limite = Number(createData.limiteItens);
+    if (Number.isNaN(limite) || limite < 0) {
+      addToast("Limite deve ser zero (ilimitado) ou um número positivo.", "warning");
+      return;
+    }
     setSubmitting(true);
     try {
       const { data } = await api.post(
@@ -156,11 +168,12 @@ export default function Beneficiarios() {
           nome: createData.nome.trim(),
           cpf: cpfLimpo,
           telefone: telefoneLimpo || null,
+          limiteItens: limite,
         },
         { headers }
       );
       setBeneficiarios((prev) => [...prev, data]);
-      setCreateData({ nome: "", cpf: "", telefone: "", endereco: "" });
+      setCreateData({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
       addToast("Beneficiário criado.", "success");
     } catch (error) {
       handleApiError(error);
@@ -234,6 +247,16 @@ export default function Beneficiarios() {
                   placeholder="Rua, número, bairro, cidade"
                 />
               </label>
+              <label className="form-label">
+                Limite de itens (0 = sem limite)
+                <input
+                  type="number"
+                  min="0"
+                  value={createData.limiteItens}
+                  onChange={(e) => setCreateData((f) => ({ ...f, limiteItens: e.target.value }))}
+                  placeholder="0"
+                />
+              </label>
             </div>
             <button className="primary-button add-button" onClick={handleCreate} disabled={submitting}>
               <Plus size={16} /> Criar beneficiário
@@ -254,6 +277,7 @@ export default function Beneficiarios() {
                     <th>CPF</th>
                     <th>Telefone</th>
                     <th>Endereço</th>
+                    <th>Limite</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -291,17 +315,29 @@ export default function Beneficiarios() {
                           formatPhone(b.telefone)
                         )}
                       </td>
-                      <td>
-                        {editId === b.id ? (
-                          <input
-                            value={editData.endereco ?? ""}
-                            onChange={(e) => setEditData((f) => ({ ...f, endereco: e.target.value }))}
-                          />
-                        ) : (
-                          b.endereco || "-"
-                        )}
-                      </td>
-                      <td className="actions">
+                    <td>
+                      {editId === b.id ? (
+                        <input
+                          value={editData.endereco ?? ""}
+                          onChange={(e) => setEditData((f) => ({ ...f, endereco: e.target.value }))}
+                        />
+                      ) : (
+                        b.endereco || "-"
+                      )}
+                    </td>
+                    <td>
+                      {editId === b.id ? (
+                        <input
+                          type="number"
+                          min="0"
+                          value={editData.limiteItens}
+                          onChange={(e) => setEditData((f) => ({ ...f, limiteItens: e.target.value }))}
+                        />
+                      ) : (
+                        b.limiteItens ?? 0
+                      )}
+                    </td>
+                    <td className="actions">
                         {editId === b.id ? (
                           <>
                             <button

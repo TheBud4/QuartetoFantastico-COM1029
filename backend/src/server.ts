@@ -13,6 +13,8 @@ import tipoRoutes from './routes/tipo.routes';
 import tamanhoRoutes from './routes/tamanho.routes';
 import condicaoRoutes from './routes/condicao.routes';
 import itemRoutes from './routes/item.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import relatorioRoutes from './routes/relatorio.routes';
 
 //rotas de beneficiarios
 import beneficiarioRoutes from './routes/beneficiario.routes';
@@ -50,6 +52,8 @@ app.use('/itens', itemRoutes);
 app.use('/item/tipos', tipoRoutes);
 app.use('/item/tamanhos', tamanhoRoutes);
 app.use('/item/condicoes', condicaoRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/relatorios', relatorioRoutes);
 
 //rotas de beneficiarios
 app.use('/beneficiarios', beneficiarioRoutes);

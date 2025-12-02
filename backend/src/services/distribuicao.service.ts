@@ -13,7 +13,7 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
     // Verificar se o voluntário e o beneficiário existem
     const [voluntario, beneficiario] = await Promise.all([
         prisma.voluntario.findUnique({ where: { id: voluntarioId } }),
-        prisma.beneficiario.findUnique({ where: { id: beneficiarioId } })
+        prisma.beneficiario.findUnique({ where: { id: beneficiarioId }, select: { id: true, limiteItens: true } })
     ]);
 
     if (!voluntario) throw new Error('Voluntário não encontrado.');
@@ -46,6 +46,23 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
         }
         if (registro.quantidade < item.quantidade) {
             throw new Error(`Estoque insuficiente para o item (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}). Disponível: ${registro.quantidade}, solicitado: ${item.quantidade}.`);
+        }
+    }
+
+    // Verificar limite de itens do beneficiário (0 = sem limite)
+    if (beneficiario.limiteItens && beneficiario.limiteItens > 0) {
+        const jaDistribuido = await prisma.itemDistribuicao.aggregate({
+            _sum: { quantidade: true },
+            where: {
+                distribuicao: {
+                    beneficiarioId: beneficiarioId,
+                },
+            },
+        });
+        const totalAtual = jaDistribuido._sum.quantidade ?? 0;
+        const totalSolicitado = itens.reduce((acc, i) => acc + i.quantidade, 0);
+        if (totalAtual + totalSolicitado > beneficiario.limiteItens) {
+            throw new Error(`Limite de itens excedido para este beneficiário. Limite: ${beneficiario.limiteItens}, atual: ${totalAtual}, solicitado: ${totalSolicitado}.`);
         }
     }
 
