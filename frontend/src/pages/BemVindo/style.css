@@ -1,5 +1,5 @@
 .bem-vindo-page {
-  background: url("public/Banner_2.jpg") no-repeat center center fixed;
+  background: url("/Banner_2.jpg") no-repeat center center fixed;
   background-size: cover;
   display: flex;
   justify-content: center;
