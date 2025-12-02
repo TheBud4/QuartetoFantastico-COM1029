@@ -5,37 +5,72 @@ import { CreateDistribuicaoSchemaType } from '../validators/distribuicao.validat
  * Cria uma nova distribuição, registrando os itens e dando baixa no estoque.
  * Este processo é transacional.
  */
-export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaType) => {
-    const { voluntarioId, beneficiarioId, itens } = data;
+export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaType, voluntarioId: number) => {
+    const { beneficiarioId, itens, cartaoNumero } = data;
 
     // --- 1. Verificações Prévias (Fora da Transação) ---
 
     // Verificar se o voluntário e o beneficiário existem
     const [voluntario, beneficiario] = await Promise.all([
         prisma.voluntario.findUnique({ where: { id: voluntarioId } }),
-        prisma.beneficiario.findUnique({ where: { id: beneficiarioId } })
+        prisma.beneficiario.findUnique({ where: { id: beneficiarioId }, select: { id: true, limiteItens: true } })
     ]);
 
     if (!voluntario) throw new Error('Voluntário não encontrado.');
     if (!beneficiario) throw new Error('Beneficiário não encontrado.');
 
-    // Verificar estoque para TODOS os itens da lista
-    const itemIds = itens.map(item => item.itemId);
+    // Beneficiário só pode receber se tiver cartão válido (ativo)
+    const cartao = await prisma.cartaoBeneficiario.findUnique({
+        where: { beneficiarioId },
+    });
+    if (!cartao || !cartao.ativo || cartao.numeroCartao !== cartaoNumero) {
+        throw new Error('Cartão do beneficiário inválido ou inativo.');
+    }
+
+    // Verificar estoque para TODOS os itens da lista, buscando pelo composto (tipo/tamanho/condição)
     const itensNoBanco = await prisma.item.findMany({
-        where: { id: { in: itemIds } },
+        where: {
+            OR: itens.map((i) => ({
+                tipoId: i.tipoId,
+                tamanhoId: i.tamanhoId,
+                condicaoId: i.condicaoId,
+            })),
+        },
     });
 
-    // Mapeia para facilitar a consulta
-    const estoqueMap = new Map(itensNoBanco.map(item => [item.id, item.quantidadeEstoque]));
+    const estoqueMap = new Map(
+        itensNoBanco.map(item => [
+            `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`,
+            { id: item.id, quantidade: item.quantidadeEstoque }
+        ])
+    );
 
     for (const item of itens) {
-        const estoqueDisponivel = estoqueMap.get(item.itemId);
+        const key = `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`;
+        const registro = estoqueMap.get(key);
 
-        if (estoqueDisponivel === undefined) {
-            throw new Error(`Item com ID ${item.itemId} não encontrado no estoque.`);
+        if (!registro) {
+            throw new Error('Não encontramos esse item no estoque para a combinação de tipo, tamanho e condição informada. Confira se ele está cadastrado e com estoque disponível.');
         }
-        if (estoqueDisponivel < item.quantidade) {
-            throw new Error(`Estoque insuficiente para o item ID ${item.itemId}. Disponível: ${estoqueDisponivel}, Solicitado: ${item.quantidade}.`);
+        if (registro.quantidade < item.quantidade) {
+            throw new Error(`Estoque insuficiente para este item. Disponível: ${registro.quantidade}, solicitado: ${item.quantidade}.`);
+        }
+    }
+
+    // Verificar limite de itens do beneficiário (0 = sem limite)
+    if (beneficiario.limiteItens && beneficiario.limiteItens > 0) {
+        const jaDistribuido = await prisma.itemDistribuicao.aggregate({
+            _sum: { quantidade: true },
+            where: {
+                distribuicao: {
+                    beneficiarioId: beneficiarioId,
+                },
+            },
+        });
+        const totalAtual = jaDistribuido._sum.quantidade ?? 0;
+        const totalSolicitado = itens.reduce((acc, i) => acc + i.quantidade, 0);
+        if (totalAtual + totalSolicitado > beneficiario.limiteItens) {
+            throw new Error(`Limite de itens excedido para este beneficiário. Limite: ${beneficiario.limiteItens}, já distribuído: ${totalAtual}, solicitado agora: ${totalSolicitado}.`);
         }
     }
 
@@ -52,27 +87,33 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
         });
 
         // b. Criar os registros em ItemDistribuicao (o "recibo")
-        await tx.itemDistribuicao.createMany({
-            data: itens.map(item => ({
-                distribuicaoId: distribuicao.id,
-                itemId: item.itemId,
-                quantidade: item.quantidade,
-            })),
-        });
+        const itensDistribuidos = [];
+        for (const item of itens) {
+            const key = `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`;
+            const registro = estoqueMap.get(key);
+            if (!registro) {
+                throw new Error('Não encontramos esse item no estoque para a combinação de tipo, tamanho e condição informada.');
+            }
 
-        // c. Atualizar (dar baixa) no estoque na tabela Item
-        const operacoesDeBaixa = itens.map(item =>
-            tx.item.update({
-                where: { id: item.itemId },
+            await tx.itemDistribuicao.create({
+                data: {
+                    distribuicaoId: distribuicao.id,
+                    itemId: registro.id,
+                    quantidade: item.quantidade,
+                },
+            });
+
+            await tx.item.update({
+                where: { id: registro.id },
                 data: {
                     quantidadeEstoque: {
                         decrement: item.quantidade,
                     },
                 },
-            })
-        );
+            });
 
-        await Promise.all(operacoesDeBaixa);
+            itensDistribuidos.push(registro.id);
+        }
 
         return distribuicao; // Retorna a distribuição criada
     });

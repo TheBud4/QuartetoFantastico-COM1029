@@ -1,7 +1,8 @@
 import { prisma } from '../config/prisma';
-import { CreateDoacaoInput } from '../validators/doacao.validator';
+import { CreateDoacaoBody, ItemDoacaoInput } from '../validators/doacao.validator';
+import { Prisma } from '@prisma/client';
 
-export const createDoacaoService = async (input: CreateDoacaoInput) => {
+export const createDoacaoService = async (input: { voluntarioId: number; itens: ItemDoacaoInput[] }) => {
   const { voluntarioId, itens } = input;
 
   const voluntario = await prisma.voluntario.findUnique({ where: { id: voluntarioId } });
@@ -9,70 +10,62 @@ export const createDoacaoService = async (input: CreateDoacaoInput) => {
     throw new Error('Voluntário não encontrado.');
   }
 
-  const novaDoacao = await prisma.$transaction(async (tx) => {
-    // Cria o registro do "evento" da Doação.
-    const doacao = await tx.doacao.create({
-      data: {
-        voluntarioId: voluntarioId,
-      },
-    });
+  try {
+    const novaDoacao = await prisma.$transaction(async (tx) => {
+      const doacao = await tx.doacao.create({
+        data: { voluntarioId },
+      });
 
-    // Para cada item na doação, verifica se já existe no catálogo e atualiza ou cria conforme necessário.
-    for (const itemDaDoacao of itens) {
-      const itemNoCatalogo = await tx.item.upsert({
+      for (const itemDaDoacao of itens) {
+        const itemNoCatalogo = await tx.item.upsert({
+          where: {
+            tipoId_tamanhoId_condicaoId: {
+              tipoId: itemDaDoacao.tipoId,
+              tamanhoId: itemDaDoacao.tamanhoId,
+              condicaoId: itemDaDoacao.condicaoId,
+            },
+          },
+          update: {
+            quantidadeEstoque: {
+              increment: itemDaDoacao.quantidade,
+            },
+          },
+          create: {
+            quantidadeEstoque: itemDaDoacao.quantidade,
+            tipo: { connect: { id: itemDaDoacao.tipoId } },
+            tamanho: { connect: { id: itemDaDoacao.tamanhoId } },
+            condicao: { connect: { id: itemDaDoacao.condicaoId } },
+          },
+        });
 
-        where: {
-          tipoId_tamanhoId_condicaoId: {
-            tipoId: itemDaDoacao.tipoId,
-            tamanhoId: itemDaDoacao.tamanhoId,
-            condicaoId: itemDaDoacao.condicaoId,
+        await tx.itemDoacao.create({
+          data: {
+            doacaoId: doacao.id,
+            itemId: itemNoCatalogo.id,
+            quantidade: itemDaDoacao.quantidade,
           },
-        },
-        // Se o item já existir, atualiza a quantidade em estoque.
-        update: {
-          quantidadeEstoque: {
-            increment: itemDaDoacao.quantidade,
-          },
-        },
-        // Se o item não for encontrado, cria um novo registro no catálogo.
-        create: {
-          quantidadeEstoque: itemDaDoacao.quantidade,
-          tipo: {
-            connect: { id: itemDaDoacao.tipoId },
-          },
-          tamanho: {
-            connect: { id: itemDaDoacao.tamanhoId },
-          },
-          condicao: {
-            connect: { id: itemDaDoacao.condicaoId },
+        });
+      }
+
+      return tx.doacao.findUnique({
+        where: { id: doacao.id },
+        include: {
+          itens: {
+            include: {
+              item: true,
+            },
           },
         },
       });
+    }, { timeout: 10000 });
 
-      // Cria o registro na tabela de ligação 'ItemDoacao'.
-      await tx.itemDoacao.create({
-        data: {
-          doacaoId: doacao.id,
-          itemId: itemNoCatalogo.id,
-          quantidade: itemDaDoacao.quantidade,
-        },
-      });
+    return novaDoacao;
+  } catch (error: any) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      throw new Error('Referência inválida para tipo, tamanho ou condição.');
     }
-
-    // Retorna a doação completa para a resposta da API.
-    return tx.doacao.findUnique({
-      where: { id: doacao.id },
-      include: {
-        itens: {
-          include: {
-            item: true,
-          },
-        },
-      },
-    });
-  });
-
-  return novaDoacao;
+    throw error;
+  }
 };
 
 export const getAllDoacoesService = async () => {
@@ -127,13 +120,17 @@ export const deleteDoacaoService = async (id: number) => {
   return prisma.$transaction(async (tx) => {
     // Para cada item que foi doado, vamos DECREMENTAR o estoque
     for (const itemDoado of doacao.itens) {
+      const item = await tx.item.findUnique({ where: { id: itemDoado.itemId } });
+      if (!item) {
+        throw new Error('Item não encontrado para estornar doação.');
+      }
+      const novaQuantidade = item.quantidadeEstoque - itemDoado.quantidade;
+      if (novaQuantidade < 0) {
+        throw new Error('Estoque insuficiente para estornar doação.');
+      }
       await tx.item.update({
         where: { id: itemDoado.itemId },
-        data: {
-          quantidadeEstoque: {
-            decrement: itemDoado.quantidade
-          }
-        }
+        data: { quantidadeEstoque: novaQuantidade }
       });
     }
 

@@ -26,10 +26,12 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 ## 🚀 Tecnologias
 
 **Frontend**
+
 - React + Vite
 - CSS Modules
 
 **Backend**
+
 - Node.js + Express (TypeScript)
 - Prisma ORM (PostgreSQL) com driver adapter `@prisma/adapter-pg`
 - Autenticação JWT (`jsonwebtoken`)
@@ -37,6 +39,7 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 - Documentação OpenAPI/Swagger (`swagger-jsdoc` + `swagger-ui-express`)
 
 **Infra**
+
 - Docker e Docker Compose
 - Scripts de migração/seed via Prisma
 
@@ -44,39 +47,55 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 
 ## ⚙️ Instalação
 
-1. Instale as dependências:
+### Backend
 
+1. Instale as dependências:
    ```bash
    npm install
    ```
-
-2. Configure o `.env` (backend e frontend, se necessário) com as variáveis de banco, JWT e seed.
-
-3. Suba os serviços com Docker:
-
+2. Configure `.env` com `DATABASE_URL`, `JWT_SECRET`, credenciais de seed (`SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`) e outras variáveis necessárias.
+3. Suba com Docker:
    ```bash
    docker compose up --build
+   ```
+4. (Opcional) Rodar migrações manualmente:
+   ```bash
+   docker compose exec app npx prisma migrate deploy
+   ```
+5. (Opcional) Rodar seed:
+   ```bash
+   docker compose exec app npx tsx prisma/seed.ts
+   ```
+
+### Frontend
+
+1. Vá para `frontend/`:
+   ```bash
+   cd frontend
+   ```
+2. Instale dependências:
+   ```bash
+   npm install
+   ```
+3. Crie/ajuste `.env` do frontend se necessário (ex.: `VITE_API_URL`).
+4. Rode localmente:
+   ```bash
+   npm run dev
    ```
 
 ---
 
 ## 🧪 Como usar
 
-1. Acesse o backend em `http://localhost:3000`.
+### Backend
+
+1. Acesse `http://localhost:3000`.
 2. Documentação da API: `http://localhost:3000/apidocs` (UI) ou `http://localhost:3000/apidocs.yaml` (YAML).
-3. Rodar migrações manualmente (se necessário):
 
-   ```bash
-   docker compose exec app npx prisma migrate deploy
-   ```
+### Frontend
 
-4. Rodar o seed:
-
-   ```bash
-   docker compose exec app npx tsx prisma/seed.ts
-   ```
-
-   > Exige `SEED_ADMIN_EMAIL` e `SEED_ADMIN_PASSWORD` definidos no `.env`.
+1. Com o backend rodando, acesse o Vite dev server (ex.: `http://localhost:5173`).
+2. Use as credenciais seed (definidas no `.env` do backend) para login inicial.
 
 ---
 
@@ -85,8 +104,14 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 - Swagger UI: `http://localhost:3000/apidocs`
 - OpenAPI YAML: `http://localhost:3000/apidocs.yaml`
 - Documento de visão: [Google Docs](https://docs.google.com/document/d/1Wcm7rU8M-KzOWyroloNW2MCT5hMKPz27V5oUWZ41BAA/edit?tab=t.0#heading=h.t5lws1x1u33z)
-- Prototipação: (em breve)
-- Board/Trello: (em breve)
+- Board (GitHub Projects): https://github.com/users/TheBud4/projects/4/views/3
+
+### MER (diagrama ER)
+
+- Caminho: `backend/docs/MER.png`
+- Pré-visualização:
+
+  ![MER](backend/docs/MER.png)
 
 ---
 
@@ -95,6 +120,13 @@ O nosso projeto tem como objetivo desenvolver um aplicativo para a SANEM, cumpri
 - Preview em tempo real
 - Multiplataforma
 - Gerenciamento do estoque de doações
+- Dashboard com métricas (voluntários, beneficiários, doações, distribuições, estoque total, itens com baixo estoque)
+- CRUDs: tipos, tamanhos, condições, itens (com ajuste de quantidade), beneficiários (com limite de itens), voluntários (com permissões), cartões, doações, distribuições
+- Registro e listagem de doações/distribuições com modais de detalhes
+- Relatório de movimentações (doações/distribuições) com download em JSON
+- Validação com Zod e campos mascarados (CPF/telefone) no frontend
+- Proteção de rotas (JWT) e controles de admin no frontend
+- Swagger/OpenAPI documentado e MER disponível
 
 ---
 
@@ -125,4 +157,5 @@ Apenas membros da equipe Quarteto Fantástico podem contribuir nesse projeto. En
 ---
 
 ## 📄 Licença
+
 Este projeto está licenciado sob a Licença MIT. Consulte o arquivo LICENSE para mais informações.
