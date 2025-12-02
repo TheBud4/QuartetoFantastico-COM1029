@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout";
+import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
@@ -18,6 +19,8 @@ export default function Condicoes() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -129,6 +132,11 @@ export default function Condicoes() {
     return condicoes.filter((c) => c.descricao.toLowerCase().includes(term));
   }, [condicoes, searchTerm]);
 
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
+
   return (
     <Layout>
       <div className="condicoes-page basetext-inter">
@@ -137,7 +145,12 @@ export default function Condicoes() {
             <h1 className="destaque-archivo-black">Condições</h1>
             <p>Gestão de condições de conservação</p>
           </div>
-          <button className="ghost-button icon-only" onClick={fetchCondicoes} disabled={loading} title="Recarregar">
+          <button
+            className="ghost-button icon-only"
+            onClick={fetchCondicoes}
+            disabled={loading}
+            title="Recarregar"
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -177,7 +190,7 @@ export default function Condicoes() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((condicao) => (
+                  {paginated.map((condicao) => (
                     <tr key={condicao.id}>
                       <td>{condicao.id}</td>
                       <td>
@@ -201,7 +214,10 @@ export default function Condicoes() {
                             >
                               Salvar
                             </button>
-                            <button className="ghost-button" onClick={cancelEdit}>
+                            <button
+                              className="ghost-button"
+                              onClick={cancelEdit}
+                            >
                               Cancelar
                             </button>
                           </>
@@ -231,6 +247,12 @@ export default function Condicoes() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
       </div>
 
@@ -276,7 +298,11 @@ export default function Condicoes() {
                 >
                   Cancelar
                 </button>
-                <button type="submit" className="primary-button" disabled={submitting}>
+                <button
+                  type="submit"
+                  className="primary-button"
+                  disabled={submitting}
+                >
                   {submitting ? "Enviando..." : "Criar condição"}
                 </button>
               </div>

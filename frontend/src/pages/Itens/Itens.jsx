@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout";
+import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
@@ -16,6 +17,8 @@ export default function Itens() {
   const [editingId, setEditingId] = useState(null);
   const [editQuantidade, setEditQuantidade] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -104,6 +107,11 @@ export default function Itens() {
     });
   }, [itens, searchTerm]);
 
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
+
   return (
     <Layout>
       <div className="itens-page basetext-inter">
@@ -153,7 +161,7 @@ export default function Itens() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((item) => (
+                  {paginated.map((item) => (
                     <tr key={item.id}>
                       <td>{item.id}</td>
                       <td>{item.tipo?.descricao || "-"}</td>
@@ -205,6 +213,12 @@ export default function Itens() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
       </div>
     </Layout>

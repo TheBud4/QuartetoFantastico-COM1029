@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout";
+import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
@@ -14,6 +15,10 @@ export default function Distribuicoes() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageModal, setPageModal] = useState(1);
+  const PER_PAGE = 8;
+  const PER_MODAL = 5;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -46,10 +51,21 @@ export default function Distribuicoes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.token]);
 
-  const formatDate = (iso) => {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    return d.toLocaleString();
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const parse = (v) => {
+      if (typeof v === "string" && v.includes("/")) {
+        const [d, m, y] = v.split("/");
+        return new Date(Number(y), Number(m) - 1, Number(d));
+      }
+      return new Date(v);
+    };
+    const d = parse(value);
+    if (isNaN(d.getTime())) return "-";
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = String(d.getFullYear());
+    return `${day}/${month}/${year}`;
   };
 
   const filtered = useMemo(() => {
@@ -60,16 +76,29 @@ export default function Distribuicoes() {
         d.itens
           ?.map((i) => {
             const item = i.item || {};
-            return `${item?.tipo?.descricao ?? ""} ${item?.tamanho?.descricao ?? ""} ${item?.condicao?.descricao ?? ""} ${i.quantidade ?? ""}`;
+            return `${item?.tipo?.descricao ?? ""} ${
+              item?.tamanho?.descricao ?? ""
+            } ${item?.condicao?.descricao ?? ""} ${i.quantidade ?? ""}`;
           })
           .join(" ")
           .toLowerCase() ?? "";
-      const voluntario = `${d.voluntario?.nome ?? ""} ${d.voluntario?.email ?? ""}`.toLowerCase();
+      const voluntario = `${d.voluntario?.nome ?? ""} ${
+        d.voluntario?.email ?? ""
+      }`.toLowerCase();
       const beneficiario = d.beneficiario?.nome?.toLowerCase?.() ?? "";
       const idStr = String(d.id ?? "");
-      return itensStr.includes(term) || voluntario.includes(term) || beneficiario.includes(term) || idStr.includes(term);
+      return (
+        itensStr.includes(term) ||
+        voluntario.includes(term) ||
+        beneficiario.includes(term) ||
+        idStr.includes(term)
+      );
     });
   }, [distribuicoes, search]);
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
 
   return (
     <Layout>
@@ -79,7 +108,12 @@ export default function Distribuicoes() {
             <h1 className="destaque-archivo-black">Distribuições</h1>
             <p>Listagem das distribuições realizadas</p>
           </div>
-          <button className="ghost-button icon-only" onClick={fetchDistribuicoes} disabled={loading} title="Recarregar">
+          <button
+            className="ghost-button icon-only"
+            onClick={fetchDistribuicoes}
+            disabled={loading}
+            title="Recarregar"
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -115,11 +149,13 @@ export default function Distribuicoes() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((d) => (
+                  {paginated.map((d) => (
                     <tr key={d.id}>
                       <td>{d.id}</td>
                       <td>{d.beneficiario?.nome || "-"}</td>
-                      <td>{d.voluntario?.nome || d.voluntario?.email || "-"}</td>
+                      <td>
+                        {d.voluntario?.nome || d.voluntario?.email || "-"}
+                      </td>
                       <td>{formatDate(d.createdAt)}</td>
                       <td>
                         <div className="itens-tags">
@@ -128,7 +164,10 @@ export default function Distribuicoes() {
                             const tagKey = i.id ?? `${d.id}-item-${idx}`;
                             return (
                               <span key={tagKey} className="tag-pill">
-                                {item.tipo?.descricao ?? "Tipo"} / {item.tamanho?.descricao ?? "Tam"} / {item.condicao?.descricao ?? "Cond"} — {i.quantidade}
+                                {item.tipo?.descricao ?? "Tipo"} /{" "}
+                                {item.tamanho?.descricao ?? "Tam"} /{" "}
+                                {item.condicao?.descricao ?? "Cond"} —{" "}
+                                {i.quantidade}
                               </span>
                             );
                           })}
@@ -149,22 +188,36 @@ export default function Distribuicoes() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
 
         {selected && (
-          <div
-            className="modal-backdrop"
-            onClick={() => setSelected(null)}
-          >
+          <div className="modal-backdrop" onClick={() => setSelected(null)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div>
-                  <h3 className="destaque-arquivo-black">Distribuição #{selected.id}</h3>
+                  <h3 className="destaque-arquivo-black">
+                    Distribuição #{selected.id}
+                  </h3>
                   <p className="basetext-inter">
-                    Beneficiário: {selected.beneficiario?.nome || "-"} | Voluntário: {selected.voluntario?.nome || selected.voluntario?.email || "-"} | Data: {formatDate(selected.createdAt)}
+                    Beneficiário: {selected.beneficiario?.nome || "-"} |
+                    Voluntário:{" "}
+                    {selected.voluntario?.nome ||
+                      selected.voluntario?.email ||
+                      "-"}{" "}
+                    | Data: {formatDate(selected.createdAt)}
                   </p>
                 </div>
-                <button className="close-btn icon-only" onClick={() => setSelected(null)} title="Fechar">
+                <button
+                  className="close-btn icon-only"
+                  onClick={() => setSelected(null)}
+                  title="Fechar"
+                >
                   <X size={18} />
                 </button>
               </div>
@@ -180,19 +233,31 @@ export default function Distribuicoes() {
                     </tr>
                   </thead>
                   <tbody>
-                    {selected.itens?.map((i, idx) => {
-                      const item = i.item || {};
-                      return (
-                        <tr key={i.id ?? `${selected.id}-item-${idx}`}>
-                          <td>{item.tipo?.descricao ?? "-"}</td>
-                          <td>{item.tamanho?.descricao ?? "-"}</td>
-                          <td>{item.condicao?.descricao ?? "-"}</td>
-                          <td>{i.quantidade}</td>
-                        </tr>
-                      );
-                    })}
+                    {selected.itens
+                      ?.slice(
+                        (pageModal - 1) * PER_MODAL,
+                        (pageModal - 1) * PER_MODAL + PER_MODAL
+                      )
+                      .map((i, idx) => {
+                        const item = i.item || {};
+                        return (
+                          <tr key={i.id ?? `${selected.id}-item-${idx}`}>
+                            <td>{item.tipo?.descricao ?? "-"}</td>
+                            <td>{item.tamanho?.descricao ?? "-"}</td>
+                            <td>{item.condicao?.descricao ?? "-"}</td>
+                            <td>{i.quantidade}</td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
+                <Pagination
+                  page={pageModal}
+                  totalItems={selected.itens?.length || 0}
+                  perPage={PER_MODAL}
+                  onChange={setPageModal}
+                  compact
+                />
               </div>
             </div>
           </div>

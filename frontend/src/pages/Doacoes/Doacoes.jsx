@@ -5,6 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
 import { Search, RefreshCw, Eye, X } from "lucide-react";
 import "./style.css";
+import Pagination from "../../components/Pagination";
 
 export default function Doacoes() {
   const { user } = useAuth();
@@ -14,6 +15,10 @@ export default function Doacoes() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
+  const [page, setPage] = useState(1);
+  const [pageModal, setPageModal] = useState(1);
+  const PER_PAGE = 8;
+  const PER_MODAL = 5;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -46,10 +51,21 @@ export default function Doacoes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.token]);
 
-  const formatDate = (iso) => {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    return d.toLocaleString();
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const parse = (v) => {
+      if (typeof v === "string" && v.includes("/")) {
+        const [d, m, y] = v.split("/");
+        return new Date(Number(y), Number(m) - 1, Number(d));
+      }
+      return new Date(v);
+    };
+    const d = parse(value);
+    if (isNaN(d.getTime())) return "-";
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = String(d.getFullYear());
+    return `${day}/${month}/${year}`;
   };
 
   const filtered = useMemo(() => {
@@ -60,15 +76,28 @@ export default function Doacoes() {
         d.itens
           ?.map((i) => {
             const item = i.item || {};
-            return `${item?.tipo?.descricao ?? ""} ${item?.tamanho?.descricao ?? ""} ${item?.condicao?.descricao ?? ""} ${i.quantidade ?? ""}`;
+            return `${item?.tipo?.descricao ?? ""} ${
+              item?.tamanho?.descricao ?? ""
+            } ${item?.condicao?.descricao ?? ""} ${i.quantidade ?? ""}`;
           })
           .join(" ")
           .toLowerCase() ?? "";
-      const voluntario = `${d.voluntario?.nome ?? ""} ${d.voluntario?.email ?? ""}`.toLowerCase();
+      const voluntario = `${d.voluntario?.nome ?? ""} ${
+        d.voluntario?.email ?? ""
+      }`.toLowerCase();
       const idStr = String(d.id ?? "");
-      return itensStr.includes(term) || voluntario.includes(term) || idStr.includes(term);
+      return (
+        itensStr.includes(term) ||
+        voluntario.includes(term) ||
+        idStr.includes(term)
+      );
     });
   }, [doacoes, search]);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
 
   return (
     <Layout>
@@ -78,7 +107,12 @@ export default function Doacoes() {
             <h1 className="destaque-archivo-black">Doações</h1>
             <p>Listagem das doações registradas</p>
           </div>
-          <button className="ghost-button icon-only" onClick={fetchDoacoes} disabled={loading} title="Recarregar">
+          <button
+            className="ghost-button icon-only"
+            onClick={fetchDoacoes}
+            disabled={loading}
+            title="Recarregar"
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -113,10 +147,12 @@ export default function Doacoes() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((d) => (
+                  {paginated.map((d) => (
                     <tr key={d.id}>
                       <td>{d.id}</td>
-                      <td>{d.voluntario?.nome || d.voluntario?.email || "-"}</td>
+                      <td>
+                        {d.voluntario?.nome || d.voluntario?.email || "-"}
+                      </td>
                       <td>{formatDate(d.createdAt)}</td>
                       <td>
                         <div className="itens-tags">
@@ -124,7 +160,10 @@ export default function Doacoes() {
                             const item = i.item || {};
                             return (
                               <span key={i.id} className="tag-pill">
-                                {item.tipo?.descricao ?? "Tipo"} / {item.tamanho?.descricao ?? "Tam"} / {item.condicao?.descricao ?? "Cond"} — {i.quantidade}
+                                {item.tipo?.descricao ?? "Tipo"} /{" "}
+                                {item.tamanho?.descricao ?? "Tam"} /{" "}
+                                {item.condicao?.descricao ?? "Cond"} —{" "}
+                                {i.quantidade}
                               </span>
                             );
                           })}
@@ -145,22 +184,35 @@ export default function Doacoes() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
 
         {selected && (
-          <div
-            className="modal-backdrop"
-            onClick={() => setSelected(null)}
-          >
+          <div className="modal-backdrop" onClick={() => setSelected(null)}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div>
-                  <h3 className="destaque-archivo-black">Doação #{selected.id}</h3>
+                  <h3 className="destaque-archivo-black">
+                    Doação #{selected.id}
+                  </h3>
                   <p className="basetext-inter">
-                    Voluntário: {selected.voluntario?.nome || selected.voluntario?.email || "-"} | Data: {formatDate(selected.createdAt)}
+                    Voluntário:{" "}
+                    {selected.voluntario?.nome ||
+                      selected.voluntario?.email ||
+                      "-"}{" "}
+                    | Data: {formatDate(selected.createdAt)}
                   </p>
                 </div>
-                <button className="close-btn icon-only" onClick={() => setSelected(null)} title="Fechar">
+                <button
+                  className="close-btn icon-only"
+                  onClick={() => setSelected(null)}
+                  title="Fechar"
+                >
                   <X size={18} />
                 </button>
               </div>
@@ -176,19 +228,31 @@ export default function Doacoes() {
                     </tr>
                   </thead>
                   <tbody>
-                    {selected.itens?.map((i, idx) => {
-                      const item = i.item || {};
-                      return (
-                        <tr key={i.id ?? `${selected.id}-item-${idx}`}>
-                          <td>{item.tipo?.descricao ?? "-"}</td>
-                          <td>{item.tamanho?.descricao ?? "-"}</td>
-                          <td>{item.condicao?.descricao ?? "-"}</td>
-                          <td>{i.quantidade}</td>
-                        </tr>
-                      );
-                    })}
+                    {selected.itens
+                      ?.slice(
+                        (pageModal - 1) * PER_MODAL,
+                        (pageModal - 1) * PER_MODAL + PER_MODAL
+                      )
+                      .map((i, idx) => {
+                        const item = i.item || {};
+                        return (
+                          <tr key={i.id ?? `${selected.id}-item-${idx}`}>
+                            <td>{item.tipo?.descricao ?? "-"}</td>
+                            <td>{item.tamanho?.descricao ?? "-"}</td>
+                            <td>{item.condicao?.descricao ?? "-"}</td>
+                            <td>{i.quantidade}</td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
+                <Pagination
+                  page={pageModal}
+                  totalItems={selected.itens?.length || 0}
+                  perPage={PER_MODAL}
+                  onChange={setPageModal}
+                  compact
+                />
               </div>
             </div>
           </div>

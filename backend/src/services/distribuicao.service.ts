@@ -6,7 +6,7 @@ import { CreateDistribuicaoSchemaType } from '../validators/distribuicao.validat
  * Este processo é transacional.
  */
 export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaType, voluntarioId: number) => {
-    const { beneficiarioId, itens } = data;
+    const { beneficiarioId, itens, cartaoNumero } = data;
 
     // --- 1. Verificações Prévias (Fora da Transação) ---
 
@@ -18,6 +18,14 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
 
     if (!voluntario) throw new Error('Voluntário não encontrado.');
     if (!beneficiario) throw new Error('Beneficiário não encontrado.');
+
+    // Beneficiário só pode receber se tiver cartão válido (ativo)
+    const cartao = await prisma.cartaoBeneficiario.findUnique({
+        where: { beneficiarioId },
+    });
+    if (!cartao || !cartao.ativo || cartao.numeroCartao !== cartaoNumero) {
+        throw new Error('Cartão do beneficiário inválido ou inativo.');
+    }
 
     // Verificar estoque para TODOS os itens da lista, buscando pelo composto (tipo/tamanho/condição)
     const itensNoBanco = await prisma.item.findMany({
@@ -42,10 +50,10 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
         const registro = estoqueMap.get(key);
 
         if (!registro) {
-            throw new Error(`Item (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}) não encontrado no estoque.`);
+            throw new Error('Não encontramos esse item no estoque para a combinação de tipo, tamanho e condição informada. Confira se ele está cadastrado e com estoque disponível.');
         }
         if (registro.quantidade < item.quantidade) {
-            throw new Error(`Estoque insuficiente para o item (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}). Disponível: ${registro.quantidade}, solicitado: ${item.quantidade}.`);
+            throw new Error(`Estoque insuficiente para este item. Disponível: ${registro.quantidade}, solicitado: ${item.quantidade}.`);
         }
     }
 
@@ -62,7 +70,7 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
         const totalAtual = jaDistribuido._sum.quantidade ?? 0;
         const totalSolicitado = itens.reduce((acc, i) => acc + i.quantidade, 0);
         if (totalAtual + totalSolicitado > beneficiario.limiteItens) {
-            throw new Error(`Limite de itens excedido para este beneficiário. Limite: ${beneficiario.limiteItens}, atual: ${totalAtual}, solicitado: ${totalSolicitado}.`);
+            throw new Error(`Limite de itens excedido para este beneficiário. Limite: ${beneficiario.limiteItens}, já distribuído: ${totalAtual}, solicitado agora: ${totalSolicitado}.`);
         }
     }
 
@@ -84,7 +92,7 @@ export const createDistribuicaoService = async (data: CreateDistribuicaoSchemaTy
             const key = `${item.tipoId}-${item.tamanhoId}-${item.condicaoId}`;
             const registro = estoqueMap.get(key);
             if (!registro) {
-                throw new Error(`Item não encontrado para distribuição (tipo ${item.tipoId}, tamanho ${item.tamanhoId}, condição ${item.condicaoId}).`);
+                throw new Error('Não encontramos esse item no estoque para a combinação de tipo, tamanho e condição informada.');
             }
 
             await tx.itemDistribuicao.create({

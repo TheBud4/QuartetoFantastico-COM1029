@@ -966,14 +966,19 @@ paths:
           name: inicio
           schema:
             type: string
-            format: date-time
-          description: Data/hora inicial (ISO)
+          description: Data inicial no formato dd/mm/aaaa (ou ISO opcional)
         - in: query
           name: fim
           schema:
             type: string
-            format: date-time
-          description: Data/hora final (ISO)
+          description: Data final no formato dd/mm/aaaa (ou ISO opcional)
+        - in: query
+          name: formato
+          schema:
+            type: string
+            enum: [json, pdf]
+            default: json
+          description: "Define o formato de saída. Use `pdf` ou o header `Accept: application/pdf` para baixar o relatório."
       responses:
         '200':
           description: Relatório de movimentações
@@ -981,6 +986,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MovimentacoesReport'
+            application/pdf:
+              schema:
+                type: string
+                format: binary
         '400':
           description: Parâmetros inválidos
         '500':
@@ -1413,9 +1422,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Distribuicao'
         '400':
-          description: Dados inválidos ou estoque insuficiente
-        '404':
-          description: Beneficiário ou item não encontrado
+          description: Dados inválidos, cartão do beneficiário inválido/inativo, limite de itens excedido ou item inexistente/sem estoque para a combinação de tipo, tamanho e condição.
         '500':
           description: Erro interno
     get:
@@ -1855,10 +1862,13 @@ components:
           type: integer
     DistribuicaoInput:
       type: object
-      required: [beneficiarioId, itens]
+      required: [beneficiarioId, cartaoNumero, itens]
       properties:
         beneficiarioId:
           type: integer
+        cartaoNumero:
+          type: string
+          description: Número do cartão ativo do beneficiário (somente dígitos)
         itens:
           type: array
           minItems: 1

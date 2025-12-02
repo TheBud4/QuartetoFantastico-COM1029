@@ -17,6 +17,9 @@ const itemDistribuicaoSchema = z.object({
 export const createDistribuicaoSchema = z.object({
     beneficiarioId: z.number({ error: issue => issue.input === undefined ? 'O ID do beneficiário é obrigatório.' : 'O ID do beneficiário deve ser numérico.' })
         .int({ message: 'O ID do beneficiário deve ser um inteiro.' }),
+    cartaoNumero: z.string({ error: issue => issue.input === undefined ? 'O número do cartão é obrigatório.' : 'O número do cartão deve ser um texto.' })
+        .regex(/^\d+$/, { message: 'O número do cartão deve conter apenas dígitos.' })
+        .min(6, { message: 'O número do cartão é inválido.' }),
 
     itens: z.array(itemDistribuicaoSchema)
         .min(1, 'A distribuição deve conter pelo menos um item.'),

@@ -19,6 +19,12 @@ export const beneficiarioSchema = z.object({
         .min(5, { message: 'O endereço deve ter no mínimo 5 caracteres.' })
         .optional()
         .nullable(),
+
+    limiteItens: z.coerce.number({ error: 'O limite de itens deve ser numérico.' })
+        .int({ message: 'O limite de itens deve ser um número inteiro.' })
+        .min(0, { message: 'O limite deve ser 0 (sem limite) ou um número positivo.' })
+        .optional()
+        .default(0),
 });
 
 // Tipo inferido para uso nos serviços

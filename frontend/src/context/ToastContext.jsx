@@ -1,5 +1,5 @@
 import { createContext, useCallback, useMemo, useState } from 'react';
-import { CheckCircle2, Info, TriangleAlert, XCircle } from 'lucide-react';
+import { CheckCircle2, Info, TriangleAlert, X, XCircle } from 'lucide-react';
 
 const ToastContext = createContext(null);
 
@@ -12,11 +12,10 @@ export function ToastProvider({ children }) {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
 
-  const addToast = useCallback((message, type = 'info', duration = 4000) => {
+  const addToast = useCallback((message, type = 'info') => {
     toastIdCounter += 1;
     const id = toastIdCounter;
     setToasts((current) => [...current, { id, message, type }]);
-    setTimeout(() => removeToast(id), duration);
   }, [removeToast]);
 
   const value = useMemo(() => ({ addToast, removeToast }), [addToast, removeToast]);
@@ -33,14 +32,25 @@ export function ToastProvider({ children }) {
 
           return (
             <div key={toast.id} className={`toast toast-${toast.type}`}>
-              <Icon size={18} />
+              <div className="toast-icon">
+                <Icon size={20} />
+              </div>
               <div className="toast-body">
-                <strong className="toast-title">
-                  {toast.type === 'success' && 'Sucesso'}
-                  {toast.type === 'error' && 'Erro'}
-                  {toast.type === 'warning' && 'Alerta'}
-                  {toast.type === 'info' && 'Informação'}
-                </strong>
+                <div className="toast-header-row">
+                  <strong className="toast-title">
+                    {toast.type === 'success' && 'Sucesso'}
+                    {toast.type === 'error' && 'Erro'}
+                    {toast.type === 'warning' && 'Alerta'}
+                    {toast.type === 'info' && 'Informação'}
+                  </strong>
+                  <button
+                    className="toast-close"
+                    onClick={() => removeToast(toast.id)}
+                    aria-label="Fechar notificação"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
                 <p className="toast-message">{toast.message}</p>
               </div>
             </div>

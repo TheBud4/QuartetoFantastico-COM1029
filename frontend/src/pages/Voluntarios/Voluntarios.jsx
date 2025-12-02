@@ -5,6 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
 import { Search, Edit3, Trash2, Plus, Save, RefreshCw } from "lucide-react";
 import "./style.css";
+import Pagination from "../../components/Pagination";
 
 export default function Voluntarios() {
   const { user } = useAuth();
@@ -15,9 +16,20 @@ export default function Voluntarios() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({ nome: "", email: "", admin: false });
-  const [createData, setCreateData] = useState({ nome: "", email: "", senha: "", admin: false });
+  const [editData, setEditData] = useState({
+    nome: "",
+    email: "",
+    admin: false,
+  });
+  const [createData, setCreateData] = useState({
+    nome: "",
+    email: "",
+    senha: "",
+    admin: false,
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 5;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -58,9 +70,18 @@ export default function Voluntarios() {
     );
   }, [voluntarios, search]);
 
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
+
   const startEdit = (vol) => {
     setEditId(vol.id);
-    setEditData({ nome: vol.nome || "", email: vol.email || "", admin: !!vol.admin });
+    setEditData({
+      nome: vol.nome || "",
+      email: vol.email || "",
+      admin: !!vol.admin,
+    });
   };
 
   const cancelEdit = () => {
@@ -81,7 +102,11 @@ export default function Voluntarios() {
     try {
       const { data } = await api.put(
         `/voluntarios/${id}`,
-        { nome: editData.nome.trim(), email: editData.email.trim(), admin: !!editData.admin },
+        {
+          nome: editData.nome.trim(),
+          email: editData.email.trim(),
+          admin: !!editData.admin,
+        },
         { headers }
       );
       setVoluntarios((prev) => prev.map((v) => (v.id === id ? data : v)));
@@ -113,7 +138,11 @@ export default function Voluntarios() {
   };
 
   const handleCreate = async () => {
-    if (!createData.nome.trim() || !createData.email.trim() || !createData.senha.trim()) {
+    if (
+      !createData.nome.trim() ||
+      !createData.email.trim() ||
+      !createData.senha.trim()
+    ) {
       addToast("Nome, e-mail e senha são obrigatórios.", "warning");
       return;
     }
@@ -151,7 +180,11 @@ export default function Voluntarios() {
             <h1 className="destaque-archivo-black">Voluntários</h1>
             <p>Gerencie o cadastro e permissões</p>
           </div>
-          <button className="ghost-button" onClick={fetchVoluntarios} disabled={loading}>
+          <button
+            className="ghost-button"
+            onClick={fetchVoluntarios}
+            disabled={loading}
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -178,7 +211,9 @@ export default function Voluntarios() {
                   <input
                     type="text"
                     value={createData.nome}
-                    onChange={(e) => setCreateData((f) => ({ ...f, nome: e.target.value }))}
+                    onChange={(e) =>
+                      setCreateData((f) => ({ ...f, nome: e.target.value }))
+                    }
                     placeholder="Nome completo"
                   />
                 </label>
@@ -187,7 +222,9 @@ export default function Voluntarios() {
                   <input
                     type="email"
                     value={createData.email}
-                    onChange={(e) => setCreateData((f) => ({ ...f, email: e.target.value }))}
+                    onChange={(e) =>
+                      setCreateData((f) => ({ ...f, email: e.target.value }))
+                    }
                     placeholder="email@exemplo.com"
                   />
                 </label>
@@ -196,7 +233,9 @@ export default function Voluntarios() {
                   <input
                     type="password"
                     value={createData.senha}
-                    onChange={(e) => setCreateData((f) => ({ ...f, senha: e.target.value }))}
+                    onChange={(e) =>
+                      setCreateData((f) => ({ ...f, senha: e.target.value }))
+                    }
                     placeholder="********"
                   />
                 </label>
@@ -204,12 +243,18 @@ export default function Voluntarios() {
                   <input
                     type="checkbox"
                     checked={createData.admin}
-                    onChange={(e) => setCreateData((f) => ({ ...f, admin: e.target.checked }))}
+                    onChange={(e) =>
+                      setCreateData((f) => ({ ...f, admin: e.target.checked }))
+                    }
                   />
                   Administrador
                 </label>
               </div>
-              <button className="primary-button add-button" onClick={handleCreate} disabled={submitting}>
+              <button
+                className="primary-button add-button"
+                onClick={handleCreate}
+                disabled={submitting}
+              >
                 <Plus size={16} /> Criar voluntário
               </button>
             </div>
@@ -232,14 +277,19 @@ export default function Voluntarios() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((v) => (
+                  {paginated.map((v) => (
                     <tr key={v.id}>
                       <td>{v.id}</td>
                       <td>
                         {editId === v.id ? (
                           <input
                             value={editData.nome}
-                            onChange={(e) => setEditData((f) => ({ ...f, nome: e.target.value }))}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                nome: e.target.value,
+                              }))
+                            }
                           />
                         ) : (
                           v.nome
@@ -249,7 +299,12 @@ export default function Voluntarios() {
                         {editId === v.id ? (
                           <input
                             value={editData.email}
-                            onChange={(e) => setEditData((f) => ({ ...f, email: e.target.value }))}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                email: e.target.value,
+                              }))
+                            }
                           />
                         ) : (
                           v.email
@@ -261,7 +316,12 @@ export default function Voluntarios() {
                             <input
                               type="checkbox"
                               checked={editData.admin}
-                              onChange={(e) => setEditData((f) => ({ ...f, admin: e.target.checked }))}
+                              onChange={(e) =>
+                                setEditData((f) => ({
+                                  ...f,
+                                  admin: e.target.checked,
+                                }))
+                              }
                             />
                             Admin
                           </label>
@@ -282,7 +342,10 @@ export default function Voluntarios() {
                               >
                                 Salvar
                               </button>
-                              <button className="ghost-button" onClick={cancelEdit}>
+                              <button
+                                className="ghost-button"
+                                onClick={cancelEdit}
+                              >
                                 Cancelar
                               </button>
                             </>
@@ -314,6 +377,12 @@ export default function Voluntarios() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
       </div>
     </Layout>

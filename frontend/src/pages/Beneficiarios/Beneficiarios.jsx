@@ -5,6 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
 import { Search, Edit3, Trash2, Plus, RefreshCw } from "lucide-react";
 import "./style.css";
+import Pagination from "../../components/Pagination";
 
 const formatCpf = (value) => {
   const digits = (value || "").replace(/\D/g, "").slice(0, 11);
@@ -16,9 +17,15 @@ const formatPhone = (value) => {
   const digits = (value || "").replace(/\D/g, "");
   if (!digits) return "-";
   if (digits.length <= 10) {
-    return digits.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3").trim().replace(/[- ]$/, "");
+    return digits
+      .replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3")
+      .trim()
+      .replace(/[- ]$/, "");
   }
-  return digits.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3").trim().replace(/[- ]$/, "");
+  return digits
+    .replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3")
+    .trim()
+    .replace(/[- ]$/, "");
 };
 
 export default function Beneficiarios() {
@@ -29,9 +36,23 @@ export default function Beneficiarios() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
-  const [createData, setCreateData] = useState({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
+  const [editData, setEditData] = useState({
+    nome: "",
+    cpf: "",
+    telefone: "",
+    endereco: "",
+    limiteItens: 0,
+  });
+  const [createData, setCreateData] = useState({
+    nome: "",
+    cpf: "",
+    telefone: "",
+    endereco: "",
+    limiteItens: 0,
+  });
   const [submitting, setSubmitting] = useState(false);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 10;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -39,7 +60,7 @@ export default function Beneficiarios() {
   );
 
   const handleApiError = (error) => {
-    const valida = error?.response?.data?.['Erro de Validação'];
+    const valida = error?.response?.data?.["Erro de Validação"];
     const message =
       (Array.isArray(valida) && valida.map((v) => v.message).join(" | ")) ||
       error?.response?.data?.message ||
@@ -70,9 +91,16 @@ export default function Beneficiarios() {
     const term = search.trim().toLowerCase();
     if (!term) return beneficiarios;
     return beneficiarios.filter((b) =>
-      `${b.nome} ${b.cpf} ${b.telefone} ${b.endereco}`.toLowerCase().includes(term)
+      `${b.nome} ${b.cpf} ${b.telefone} ${b.endereco}`
+        .toLowerCase()
+        .includes(term)
     );
   }, [beneficiarios, search]);
+
+  const paginated = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filtered.slice(start, start + PER_PAGE);
+  }, [filtered, page]);
 
   const startEdit = (b) => {
     setEditId(b.id);
@@ -87,7 +115,13 @@ export default function Beneficiarios() {
 
   const cancelEdit = () => {
     setEditId(null);
-    setEditData({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
+    setEditData({
+      nome: "",
+      cpf: "",
+      telefone: "",
+      endereco: "",
+      limiteItens: 0,
+    });
   };
 
   const handleUpdate = async (id) => {
@@ -100,10 +134,15 @@ export default function Beneficiarios() {
       addToast("CPF deve ter 11 dígitos.", "warning");
       return;
     }
-    const telefoneLimpo = editData.telefone ? editData.telefone.replace(/\D/g, "") : "";
+    const telefoneLimpo = editData.telefone
+      ? editData.telefone.replace(/\D/g, "")
+      : "";
     const limite = Number(editData.limiteItens);
     if (Number.isNaN(limite) || limite < 0) {
-      addToast("Limite deve ser zero (ilimitado) ou um número positivo.", "warning");
+      addToast(
+        "Limite deve ser zero (ilimitado) ou um número positivo.",
+        "warning"
+      );
       return;
     }
     setSubmitting(true);
@@ -153,10 +192,15 @@ export default function Beneficiarios() {
       addToast("CPF deve ter 11 dígitos.", "warning");
       return;
     }
-    const telefoneLimpo = createData.telefone ? createData.telefone.replace(/\D/g, "") : "";
+    const telefoneLimpo = createData.telefone
+      ? createData.telefone.replace(/\D/g, "")
+      : "";
     const limite = Number(createData.limiteItens);
     if (Number.isNaN(limite) || limite < 0) {
-      addToast("Limite deve ser zero (ilimitado) ou um número positivo.", "warning");
+      addToast(
+        "Limite deve ser zero (ilimitado) ou um número positivo.",
+        "warning"
+      );
       return;
     }
     setSubmitting(true);
@@ -173,7 +217,13 @@ export default function Beneficiarios() {
         { headers }
       );
       setBeneficiarios((prev) => [...prev, data]);
-      setCreateData({ nome: "", cpf: "", telefone: "", endereco: "", limiteItens: 0 });
+      setCreateData({
+        nome: "",
+        cpf: "",
+        telefone: "",
+        endereco: "",
+        limiteItens: 0,
+      });
       addToast("Beneficiário criado.", "success");
     } catch (error) {
       handleApiError(error);
@@ -190,7 +240,12 @@ export default function Beneficiarios() {
             <h1 className="destaque-archivo-black">Beneficiários</h1>
             <p>Cadastre e gerencie beneficiários</p>
           </div>
-          <button className="ghost-button icon-only" onClick={fetchBeneficiarios} disabled={loading} title="Recarregar">
+          <button
+            className="ghost-button icon-only"
+            onClick={fetchBeneficiarios}
+            disabled={loading}
+            title="Recarregar"
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -216,7 +271,9 @@ export default function Beneficiarios() {
                 <input
                   type="text"
                   value={createData.nome}
-                  onChange={(e) => setCreateData((f) => ({ ...f, nome: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateData((f) => ({ ...f, nome: e.target.value }))
+                  }
                   placeholder="Nome completo"
                 />
               </label>
@@ -225,7 +282,9 @@ export default function Beneficiarios() {
                 <input
                   type="text"
                   value={createData.cpf}
-                  onChange={(e) => setCreateData((f) => ({ ...f, cpf: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateData((f) => ({ ...f, cpf: e.target.value }))
+                  }
                   placeholder="Somente números"
                 />
               </label>
@@ -234,7 +293,9 @@ export default function Beneficiarios() {
                 <input
                   type="text"
                   value={createData.telefone}
-                  onChange={(e) => setCreateData((f) => ({ ...f, telefone: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateData((f) => ({ ...f, telefone: e.target.value }))
+                  }
                   placeholder="(xx) xxxxx-xxxx"
                 />
               </label>
@@ -243,7 +304,9 @@ export default function Beneficiarios() {
                 <input
                   type="text"
                   value={createData.endereco}
-                  onChange={(e) => setCreateData((f) => ({ ...f, endereco: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateData((f) => ({ ...f, endereco: e.target.value }))
+                  }
                   placeholder="Rua, número, bairro, cidade"
                 />
               </label>
@@ -253,12 +316,21 @@ export default function Beneficiarios() {
                   type="number"
                   min="0"
                   value={createData.limiteItens}
-                  onChange={(e) => setCreateData((f) => ({ ...f, limiteItens: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateData((f) => ({
+                      ...f,
+                      limiteItens: e.target.value,
+                    }))
+                  }
                   placeholder="0"
                 />
               </label>
             </div>
-            <button className="primary-button add-button" onClick={handleCreate} disabled={submitting}>
+            <button
+              className="primary-button add-button"
+              onClick={handleCreate}
+              disabled={submitting}
+            >
               <Plus size={16} /> Criar beneficiário
             </button>
           </div>
@@ -282,14 +354,19 @@ export default function Beneficiarios() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((b) => (
+                  {paginated.map((b) => (
                     <tr key={b.id}>
                       <td>{b.id}</td>
                       <td>
                         {editId === b.id ? (
                           <input
                             value={editData.nome}
-                            onChange={(e) => setEditData((f) => ({ ...f, nome: e.target.value }))}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                nome: e.target.value,
+                              }))
+                            }
                           />
                         ) : (
                           b.nome
@@ -299,7 +376,12 @@ export default function Beneficiarios() {
                         {editId === b.id ? (
                           <input
                             value={editData.cpf}
-                            onChange={(e) => setEditData((f) => ({ ...f, cpf: e.target.value }))}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                cpf: e.target.value,
+                              }))
+                            }
                           />
                         ) : (
                           formatCpf(b.cpf)
@@ -309,35 +391,50 @@ export default function Beneficiarios() {
                         {editId === b.id ? (
                           <input
                             value={editData.telefone ?? ""}
-                            onChange={(e) => setEditData((f) => ({ ...f, telefone: e.target.value }))}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                telefone: e.target.value,
+                              }))
+                            }
                           />
                         ) : (
                           formatPhone(b.telefone)
                         )}
                       </td>
-                    <td>
-                      {editId === b.id ? (
-                        <input
-                          value={editData.endereco ?? ""}
-                          onChange={(e) => setEditData((f) => ({ ...f, endereco: e.target.value }))}
-                        />
-                      ) : (
-                        b.endereco || "-"
-                      )}
-                    </td>
-                    <td>
-                      {editId === b.id ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={editData.limiteItens}
-                          onChange={(e) => setEditData((f) => ({ ...f, limiteItens: e.target.value }))}
-                        />
-                      ) : (
-                        b.limiteItens ?? 0
-                      )}
-                    </td>
-                    <td className="actions">
+                      <td>
+                        {editId === b.id ? (
+                          <input
+                            value={editData.endereco ?? ""}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                endereco: e.target.value,
+                              }))
+                            }
+                          />
+                        ) : (
+                          b.endereco || "-"
+                        )}
+                      </td>
+                      <td>
+                        {editId === b.id ? (
+                          <input
+                            type="number"
+                            min="0"
+                            value={editData.limiteItens}
+                            onChange={(e) =>
+                              setEditData((f) => ({
+                                ...f,
+                                limiteItens: e.target.value,
+                              }))
+                            }
+                          />
+                        ) : (
+                          b.limiteItens ?? 0
+                        )}
+                      </td>
+                      <td className="actions">
                         {editId === b.id ? (
                           <>
                             <button
@@ -347,7 +444,10 @@ export default function Beneficiarios() {
                             >
                               Salvar
                             </button>
-                            <button className="ghost-button" onClick={cancelEdit}>
+                            <button
+                              className="ghost-button"
+                              onClick={cancelEdit}
+                            >
                               Cancelar
                             </button>
                           </>
@@ -378,6 +478,12 @@ export default function Beneficiarios() {
               </table>
             )}
           </div>
+          <Pagination
+            page={page}
+            totalItems={filtered.length}
+            perPage={PER_PAGE}
+            onChange={setPage}
+          />
         </section>
       </div>
     </Layout>

@@ -32,6 +32,34 @@ const corsOptions = {
 const app = express();
 app.use(express.json(), cors(corsOptions));
 
+// Formata automaticamente campos Date para dd/mm/aaaa nas respostas JSON
+const formatDateBR = (date: Date) => {
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = String(d.getFullYear());
+  return `${day}/${month}/${year}`;
+};
+
+const mapDates = (data: any): any => {
+  if (data instanceof Date) return formatDateBR(data);
+  if (Array.isArray(data)) return data.map(mapDates);
+  if (data && typeof data === 'object') {
+    return Object.entries(data).reduce((acc, [key, value]) => {
+      acc[key] = mapDates(value);
+      return acc;
+    }, {} as Record<string, any>);
+  }
+  return data;
+};
+
+app.use((req, res, next) => {
+  const originalJson = res.json.bind(res);
+  res.json = (body: any) => originalJson(mapDates(body));
+  next();
+});
+
 setupSwagger(app);
 
 app.get("/", (req: Request, res: Response) => {

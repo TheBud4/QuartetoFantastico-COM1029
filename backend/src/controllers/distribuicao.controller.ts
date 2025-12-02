@@ -15,9 +15,16 @@ export const createDistribuicaoController = async (req: Request, res: Response) 
         return res.status(201).json(novaDistribuicao);
     } catch (error: any) {
         // Erros de negócio (falta de estoque, item não encontrado)
-        if (error.message.includes('Estoque insuficiente') || 
-            error.message.includes('não encontrado')) {
-        return res.status(400).json({ message: error.message }); // 400 Bad Request
+        const msg = error.message || '';
+        const lower = msg.toLowerCase();
+        if (
+            msg.includes('Estoque insuficiente') ||
+            lower.includes('não encontrado') ||
+            lower.includes('nao encontrado') ||
+            msg.includes('Não encontramos esse item') ||
+            msg.includes('Limite de itens excedido')
+        ) {
+            return res.status(400).json({ message: error.message }); // 400 Bad Request
         }
         // Erro genérico
         return res.status(500).json({ message: 'Erro interno do servidor ao criar a distribuição.' });

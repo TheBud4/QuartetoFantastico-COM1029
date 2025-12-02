@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout";
+import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
@@ -18,6 +19,8 @@ export default function Tamanhos() {
   const [editDescricao, setEditDescricao] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -132,6 +135,11 @@ export default function Tamanhos() {
     return tipos.filter((t) => t.descricao.toLowerCase().includes(term));
   }, [tipos, searchTerm]);
 
+  const paginatedTipos = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return tiposFiltrados.slice(start, start + PER_PAGE);
+  }, [tiposFiltrados, page]);
+
   return (
     <Layout>
       <div className="tamanhos-page basetext-inter">
@@ -140,7 +148,12 @@ export default function Tamanhos() {
             <h1 className="destaque-archivo-black">Tamanhos</h1>
             <p>Cadastre vários tamanhos para cada tipo</p>
           </div>
-          <button className="ghost-button icon-only" onClick={fetchData} disabled={loading} title="Recarregar">
+          <button
+            className="ghost-button icon-only"
+            onClick={fetchData}
+            disabled={loading}
+            title="Recarregar"
+          >
             <RefreshCw size={16} />
           </button>
         </div>
@@ -164,8 +177,10 @@ export default function Tamanhos() {
             <p>Nenhum tipo encontrado.</p>
           ) : (
             <div className="tipo-cards">
-              {tiposFiltrados.map((tipo) => {
-                const tamanhosDoTipo = tamanhos.filter((t) => t.tipoId === tipo.id);
+              {paginatedTipos.map((tipo) => {
+                const tamanhosDoTipo = tamanhos.filter(
+                  (t) => t.tipoId === tipo.id
+                );
                 return (
                   <div key={tipo.id} className="tipo-card">
                     <div className="tipo-card-header">
@@ -216,7 +231,9 @@ export default function Tamanhos() {
                                 {editId === tamanho.id ? (
                                   <input
                                     value={editDescricao}
-                                    onChange={(e) => setEditDescricao(e.target.value)}
+                                    onChange={(e) =>
+                                      setEditDescricao(e.target.value)
+                                    }
                                     placeholder="Descrição"
                                   />
                                 ) : (
@@ -233,7 +250,10 @@ export default function Tamanhos() {
                                     >
                                       Salvar
                                     </button>
-                                    <button className="ghost-button" onClick={cancelEdit}>
+                                    <button
+                                      className="ghost-button"
+                                      onClick={cancelEdit}
+                                    >
                                       Cancelar
                                     </button>
                                   </>
@@ -268,6 +288,12 @@ export default function Tamanhos() {
             </div>
           )}
         </section>
+        <Pagination
+          page={page}
+          totalItems={tiposFiltrados.length}
+          perPage={PER_PAGE}
+          onChange={setPage}
+        />
       </div>
     </Layout>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout";
+import Pagination from "../../components/Pagination";
 import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
@@ -19,6 +20,8 @@ export default function Tipos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [tamanhos, setTamanhos] = useState([]);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 8;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -134,6 +137,11 @@ export default function Tipos() {
     return tipos.filter((tipo) => tipo.descricao.toLowerCase().includes(term));
   }, [tipos, searchTerm]);
 
+  const paginatedTipos = useMemo(() => {
+    const start = (page - 1) * PER_PAGE;
+    return filteredTipos.slice(start, start + PER_PAGE);
+  }, [filteredTipos, page]);
+
   return (
     <Layout>
       <div className="tipos-page basetext-inter">
@@ -188,7 +196,7 @@ export default function Tipos() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTipos.map((tipo) => (
+                  {paginatedTipos.map((tipo) => (
                     <tr key={tipo.id}>
                       <td>{tipo.id}</td>
                       <td>
@@ -257,6 +265,12 @@ export default function Tipos() {
             )}
           </div>
         </section>
+        <Pagination
+          page={page}
+          totalItems={filteredTipos.length}
+          perPage={PER_PAGE}
+          onChange={setPage}
+        />
       </div>
       {showModal && (
         <div

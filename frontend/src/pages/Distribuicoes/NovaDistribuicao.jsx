@@ -4,6 +4,7 @@ import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
 import { Plus, Trash2, Search } from "lucide-react";
+import Pagination from "../../components/Pagination";
 import "./style.css";
 
 export default function NovaDistribuicao() {
@@ -15,6 +16,7 @@ export default function NovaDistribuicao() {
   const [condicoes, setCondicoes] = useState([]);
   const [beneficiarios, setBeneficiarios] = useState([]);
   const [beneficiarioId, setBeneficiarioId] = useState("");
+  const [cartaoNumero, setCartaoNumero] = useState("");
   const [form, setForm] = useState({
     tipoId: "",
     tamanhoId: "",
@@ -25,6 +27,8 @@ export default function NovaDistribuicao() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pageForm, setPageForm] = useState(1);
+  const PER_PAGE_FORM = 5;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -43,12 +47,13 @@ export default function NovaDistribuicao() {
     if (!user?.token) return;
     setLoading(true);
     try {
-      const [tiposRes, tamanhosRes, condicoesRes, beneficiariosRes] = await Promise.all([
-        api.get("/item/tipos", { headers }),
-        api.get("/item/tamanhos", { headers }),
-        api.get("/item/condicoes", { headers }),
-        api.get("/beneficiarios", { headers }),
-      ]);
+      const [tiposRes, tamanhosRes, condicoesRes, beneficiariosRes] =
+        await Promise.all([
+          api.get("/item/tipos", { headers }),
+          api.get("/item/tamanhos", { headers }),
+          api.get("/item/condicoes", { headers }),
+          api.get("/beneficiarios", { headers }),
+        ]);
       setTipos(tiposRes.data);
       setTamanhos(tamanhosRes.data);
       setCondicoes(condicoesRes.data);
@@ -78,7 +83,12 @@ export default function NovaDistribuicao() {
     }
     setItens((prev) => [
       ...prev,
-      { tipoId: Number(tipoId), tamanhoId: Number(tamanhoId), condicaoId: Number(condicaoId), quantidade: qty },
+      {
+        tipoId: Number(tipoId),
+        tamanhoId: Number(tamanhoId),
+        condicaoId: Number(condicaoId),
+        quantidade: qty,
+      },
     ]);
     setForm({ tipoId: "", tamanhoId: "", condicaoId: "", quantidade: "" });
   };
@@ -92,6 +102,10 @@ export default function NovaDistribuicao() {
       addToast("Selecione um beneficiário.", "warning");
       return;
     }
+    if (!cartaoNumero.trim()) {
+      addToast("Informe o número do cartão do beneficiário.", "warning");
+      return;
+    }
     if (itens.length === 0) {
       addToast("Adicione ao menos um item.", "warning");
       return;
@@ -100,12 +114,17 @@ export default function NovaDistribuicao() {
     try {
       await api.post(
         "/distribuicoes",
-        { beneficiarioId: Number(beneficiarioId), itens },
+        {
+          beneficiarioId: Number(beneficiarioId),
+          cartaoNumero: cartaoNumero.replace(/\D/g, ""),
+          itens,
+        },
         { headers }
       );
       addToast("Distribuição registrada com sucesso.", "success");
       setItens([]);
       setBeneficiarioId("");
+      setCartaoNumero("");
     } catch (error) {
       handleApiError(error);
     } finally {
@@ -119,13 +138,28 @@ export default function NovaDistribuicao() {
     return itens.filter((i) => {
       const tipo = tipos.find((t) => t.id === i.tipoId)?.descricao ?? "";
       const tam = tamanhos.find((t) => t.id === i.tamanhoId)?.descricao ?? "";
-      const cond = condicoes.find((c) => c.id === i.condicaoId)?.descricao ?? "";
-      return `${tipo} ${tam} ${cond} ${i.quantidade}`.toLowerCase().includes(term);
+      const cond =
+        condicoes.find((c) => c.id === i.condicaoId)?.descricao ?? "";
+      return `${tipo} ${tam} ${cond} ${i.quantidade}`
+        .toLowerCase()
+        .includes(term);
     });
   }, [itens, search, tipos, tamanhos, condicoes]);
 
-  const renderSelect = (label, value, onChange, options, placeholder) => (
-    <label className="basetext-inter form-label">
+  const paginatedItens = useMemo(() => {
+    const start = (pageForm - 1) * PER_PAGE_FORM;
+    return filteredItens.slice(start, start + PER_PAGE_FORM);
+  }, [filteredItens, pageForm]);
+
+  const renderSelect = (
+    label,
+    value,
+    onChange,
+    options,
+    placeholder,
+    extraClass = ""
+  ) => (
+    <label className={`basetext-inter form-label ${extraClass}`}>
       {label}
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{placeholder}</option>
@@ -152,7 +186,10 @@ export default function NovaDistribuicao() {
           <div className="form-grid">
             <label className="basetext-inter form-label">
               Beneficiário
-              <select value={beneficiarioId} onChange={(e) => setBeneficiarioId(e.target.value)}>
+              <select
+                value={beneficiarioId}
+                onChange={(e) => setBeneficiarioId(e.target.value)}
+              >
                 <option value="">Selecione o beneficiário</option>
                 {beneficiarios.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -161,31 +198,62 @@ export default function NovaDistribuicao() {
                 ))}
               </select>
             </label>
+            <label className="basetext-inter form-label">
+              N° do cartão
+              <input
+                type="text"
+                value={cartaoNumero}
+                onChange={(e) => setCartaoNumero(e.target.value)}
+                placeholder="Somente números"
+              />
+            </label>
 
-            {renderSelect("Tipo", form.tipoId, (val) => setForm((f) => ({ ...f, tipoId: val })), tipos, "Selecione o tipo")}
+            {renderSelect(
+              "Tipo",
+              form.tipoId,
+              (val) => setForm((f) => ({ ...f, tipoId: val })),
+              tipos,
+              "Selecione o tipo"
+            )}
             {renderSelect(
               "Tamanho",
               form.tamanhoId,
               (val) => setForm((f) => ({ ...f, tamanhoId: val })),
-              form.tipoId ? tamanhos.filter((t) => t.tipoId === Number(form.tipoId)) : tamanhos,
-              "Selecione o tamanho"
+              form.tipoId
+                ? tamanhos.filter((t) => t.tipoId === Number(form.tipoId))
+                : tamanhos,
+              "Selecione o tamanho",
+              "small-field"
             )}
-            {renderSelect("Condição", form.condicaoId, (val) => setForm((f) => ({ ...f, condicaoId: val })), condicoes, "Selecione a condição")}
+            {renderSelect(
+              "Condição",
+              form.condicaoId,
+              (val) => setForm((f) => ({ ...f, condicaoId: val })),
+              condicoes,
+              "Selecione a condição"
+            )}
 
-            <label className="basetext-inter form-label">
+            <label className="basetext-inter form-label qty">
               Quantidade
               <input
                 type="number"
                 min="1"
                 value={form.quantidade}
-                onChange={(e) => setForm((f) => ({ ...f, quantidade: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, quantidade: e.target.value }))
+                }
                 placeholder="Ex.: 3"
               />
             </label>
           </div>
 
           <div className="actions-row">
-            <button type="button" className="primary-button add-button" onClick={addItem} disabled={loading || submitting}>
+            <button
+              type="button"
+              className="primary-button add-button"
+              onClick={addItem}
+              disabled={loading || submitting}
+            >
               <Plus size={16} /> Adicionar item
             </button>
           </div>
@@ -206,42 +274,59 @@ export default function NovaDistribuicao() {
             {filteredItens.length === 0 ? (
               <p>Nenhum item adicionado.</p>
             ) : (
-              <table className="dist-table">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Tamanho</th>
-                    <th>Condição</th>
-                    <th>Qtd</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItens.map((i, idx) => {
-                    const tipo = tipos.find((t) => t.id === i.tipoId)?.descricao ?? "-";
-                    const tam = tamanhos.find((t) => t.id === i.tamanhoId)?.descricao ?? "-";
-                    const cond = condicoes.find((c) => c.id === i.condicaoId)?.descricao ?? "-";
-                    return (
-                      <tr key={`${i.tipoId}-${i.tamanhoId}-${i.condicaoId}-${idx}`}>
-                        <td>{tipo}</td>
-                        <td>{tam}</td>
-                        <td>{cond}</td>
-                        <td>{i.quantidade}</td>
-                        <td className="actions">
-                          <button
-                            className="icon-button danger"
-                            type="button"
-                            title="Remover"
-                            onClick={() => removeItem(idx)}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <>
+                <table className="dist-table">
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Tamanho</th>
+                      <th>Condição</th>
+                      <th>Qtd</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItens.map((i, idx) => {
+                      const tipo =
+                        tipos.find((t) => t.id === i.tipoId)?.descricao ?? "-";
+                      const tam =
+                        tamanhos.find((t) => t.id === i.tamanhoId)?.descricao ??
+                        "-";
+                      const cond =
+                        condicoes.find((c) => c.id === i.condicaoId)
+                          ?.descricao ?? "-";
+                      const globalIndex = (pageForm - 1) * 5 + idx;
+                      return (
+                        <tr
+                          key={`${i.tipoId}-${i.tamanhoId}-${i.condicaoId}-${globalIndex}`}
+                        >
+                          <td>{tipo}</td>
+                          <td>{tam}</td>
+                          <td>{cond}</td>
+                          <td>{i.quantidade}</td>
+                          <td className="actions">
+                            <button
+                              className="icon-button danger"
+                              type="button"
+                              title="Remover"
+                              onClick={() => removeItem(globalIndex)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <Pagination
+                  page={pageForm}
+                  totalItems={filteredItens.length}
+                  perPage={5}
+                  onChange={setPageForm}
+                  compact
+                />
+              </>
             )}
           </div>
 

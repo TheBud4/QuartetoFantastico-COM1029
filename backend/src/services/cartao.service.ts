@@ -12,13 +12,12 @@ export const createCartaoService = async (data: CreateCartaoSchemaType) => {
         throw new Error('Beneficiário não encontrado.');
     }
 
-    // 2. Verificar a regra 1:1 (Beneficiário já tem cartão?)
+    // 2. Verificar se já existe cartão
     const cartaoExistente = await prisma.cartaoBeneficiario.findUnique({
         where: { beneficiarioId: data.beneficiarioId },
     });
-    if (cartaoExistente) {
-        throw new Error('Este beneficiário já possui um cartão cadastrado.');
-    }
+
+    const hoje = new Date();
 
     // 3. Gerar um número de cartão ÚNICO
     let numeroCartao: string;
@@ -40,17 +39,32 @@ export const createCartaoService = async (data: CreateCartaoSchemaType) => {
     const codigoSeguranca = generateCVV();
 
     // 5. Calcular a data de validade (1 ano a partir de agora)
-    const dataValidade = new Date(); // Pega a data/hora atual
-    dataValidade.setFullYear(dataValidade.getFullYear() + 1); // Adiciona 1 ano
+    const dataValidade = new Date();
+    dataValidade.setFullYear(dataValidade.getFullYear() + 1);
 
-    // 6. Criar o cartão no banco
+    // 6. Se existir e estiver vencido, renova; se existir e for válido, bloqueia; se não existir, cria
+    if (cartaoExistente) {
+        if (cartaoExistente.dataValidade < hoje) {
+            return prisma.cartaoBeneficiario.update({
+                where: { id: cartaoExistente.id },
+                data: {
+                    numeroCartao: numeroCartao!,
+                    codigoSeguranca,
+                    dataValidade,
+                    ativo: true,
+                },
+            });
+        }
+        throw new Error('Este beneficiário já possui um cartão válido.');
+    }
+
     return prisma.cartaoBeneficiario.create({
         data: {
-        beneficiarioId: data.beneficiarioId,
-        dataValidade: dataValidade,
-        numeroCartao: numeroCartao!, // '!' pois o loop garante que será atribuído
-        codigoSeguranca: codigoSeguranca,
-        ativo: true, // O cartão é criado como 'ativo' por padrão
+            beneficiarioId: data.beneficiarioId,
+            dataValidade,
+            numeroCartao: numeroCartao!,
+            codigoSeguranca,
+            ativo: true,
         },
     });
 };

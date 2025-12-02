@@ -4,6 +4,7 @@ import api from "../../services/api";
 import useAuth from "../../hooks/useAuth";
 import useToast from "../../hooks/useToast";
 import { Plus, Trash2, Search } from "lucide-react";
+import Pagination from "../../components/Pagination";
 import "./style.css";
 
 export default function NovaDoacao() {
@@ -23,6 +24,8 @@ export default function NovaDoacao() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [pageForm, setPageForm] = useState(1);
+  const PER_PAGE_FORM = 5;
 
   const headers = useMemo(
     () => (user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -112,8 +115,13 @@ export default function NovaDoacao() {
     });
   }, [itens, search, tipos, tamanhos, condicoes]);
 
-  const renderSelect = (label, value, onChange, options, placeholder) => (
-    <label className="basetext-inter form-label">
+  const paginatedItens = useMemo(() => {
+    const start = (pageForm - 1) * PER_PAGE_FORM;
+    return filteredItens.slice(start, start + PER_PAGE_FORM);
+  }, [filteredItens, pageForm]);
+
+  const renderSelect = (label, value, onChange, options, placeholder, extraClass = "") => (
+    <label className={`basetext-inter form-label ${extraClass}`}>
       {label}
       <select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{placeholder}</option>
@@ -144,10 +152,11 @@ export default function NovaDoacao() {
               form.tamanhoId,
               (val) => setForm((f) => ({ ...f, tamanhoId: val })),
               form.tipoId ? tamanhos.filter((t) => t.tipoId === Number(form.tipoId)) : tamanhos,
-              "Selecione o tamanho"
+              "Selecione o tamanho",
+              "small-field"
             )}
             {renderSelect("Condição", form.condicaoId, (val) => setForm((f) => ({ ...f, condicaoId: val })), condicoes, "Selecione a condição")}
-            <label className="basetext-inter form-label">
+            <label className="basetext-inter form-label qty">
               Quantidade
               <input
                 type="number"
@@ -180,42 +189,52 @@ export default function NovaDoacao() {
             {filteredItens.length === 0 ? (
               <p>Nenhum item adicionado.</p>
             ) : (
-              <table className="doacoes-table">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Tamanho</th>
-                    <th>Condição</th>
-                    <th>Qtd</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredItens.map((i, idx) => {
-                    const tipo = tipos.find((t) => t.id === i.tipoId)?.descricao ?? "-";
-                    const tam = tamanhos.find((t) => t.id === i.tamanhoId)?.descricao ?? "-";
-                    const cond = condicoes.find((c) => c.id === i.condicaoId)?.descricao ?? "-";
-                    return (
-                      <tr key={`${i.tipoId}-${i.tamanhoId}-${i.condicaoId}-${idx}`}>
-                        <td>{tipo}</td>
-                        <td>{tam}</td>
-                        <td>{cond}</td>
-                        <td>{i.quantidade}</td>
-                        <td className="actions">
-                          <button
-                            className="icon-button danger"
-                            type="button"
-                            title="Remover"
-                            onClick={() => removeItem(idx)}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <>
+                <table className="doacoes-table">
+                  <thead>
+                    <tr>
+                      <th>Tipo</th>
+                      <th>Tamanho</th>
+                      <th>Condição</th>
+                      <th>Qtd</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paginatedItens.map((i, idx) => {
+                      const tipo = tipos.find((t) => t.id === i.tipoId)?.descricao ?? "-";
+                      const tam = tamanhos.find((t) => t.id === i.tamanhoId)?.descricao ?? "-";
+                      const cond = condicoes.find((c) => c.id === i.condicaoId)?.descricao ?? "-";
+                      const globalIndex = (pageForm - 1) * 5 + idx;
+                      return (
+                        <tr key={`${i.tipoId}-${i.tamanhoId}-${i.condicaoId}-${globalIndex}`}>
+                          <td>{tipo}</td>
+                          <td>{tam}</td>
+                          <td>{cond}</td>
+                          <td>{i.quantidade}</td>
+                          <td className="actions">
+                            <button
+                              className="icon-button danger"
+                              type="button"
+                              title="Remover"
+                              onClick={() => removeItem(globalIndex)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <Pagination
+                  page={pageForm}
+                  totalItems={filteredItens.length}
+                  perPage={PER_PAGE_FORM}
+                  onChange={setPageForm}
+                  compact
+                />
+              </>
             )}
           </div>
 
